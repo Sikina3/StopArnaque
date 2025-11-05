@@ -34,7 +34,7 @@ function TopNav() {
               color: '#1F9EF9'
             }}
           >
-            StopArnaque
+            Signaleo
           </Typography>
 
              {/** Box pour la responsive android */}
@@ -94,7 +94,7 @@ function TopNav() {
               textDecoration: 'none'
             }}
           >
-            StopArnaque
+            Signaleo
           </Typography>
 
           <Box sx={{ 
