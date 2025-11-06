@@ -3,6 +3,7 @@ import TopNav from "../components/TopNav"
 import Welcom from "./Home/Welcom";
 import SearchSection from "./Home/SearchSection";
 import HowItWorks from "./Home/HowItWorks";
+import LastSignalement from "./Home/LastSignalement";
 
 function App(){
     return(
@@ -14,7 +15,7 @@ function App(){
                 <Welcom />
                 <SearchSection />
                 <HowItWorks />
-                <Box sx={{ height: "100vh", backgroundColor: "#cccccc", width: "100%" }}></Box>
+                <LastSignalement />
                 <Box sx={{ height: "100vh", backgroundColor: "#b3b3b3", width: "100%" }}></Box>
             </Box>
         </Box>
