@@ -31,6 +31,7 @@ function Welcom() {
               textTransform: "none",
               borderColor: "#bdc1ca",
               paddingX: 5,
+              fontSize: {md: "1rem", xs: "0.6rem"}
             }}
           >
             Signaler une Arnaque

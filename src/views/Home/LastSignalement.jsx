@@ -50,7 +50,7 @@ function LastSignalement() {
           borderColor: "#bdc1ca",
           paddingX: 5,
           marginTop: {md: 6},
-          fontSize: {xs: "0.7rem"}
+          fontSize: {xs: "0.7rem", md: "0.9rem"}
         }}
       >
         Voir tout les signalements
