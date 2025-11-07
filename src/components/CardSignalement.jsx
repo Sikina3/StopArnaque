@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from "@mui/material";
+import { Box, Button, Grid, Paper, Typography } from "@mui/material";
 import Divider from '@mui/material/Divider';
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
@@ -77,7 +77,7 @@ function CardSignalement({ titre, categorie, date, LikeNumber, ChatNumber, image
           <ChatBubbleOutlineOutlinedIcon sx={{ color: "#5F5F5F", fontSize: {xs: 18, md: 25}, marginRight: {xs: 0.5} }} />
           <Typography sx={{color: "#5F5F5F", fontSize: { xs: "0.7rem", md: "0.9rem"} }}> {ChatNumber} </Typography>
 
-          <Typography sx={{ color: "#1F9EF9", fontSize: {md: "0.8rem", xs: "0.7rem"}, marginLeft: 14}}> Voir détails </Typography>
+          <Button sx={{ color: "#1F9EF9", fontSize: {md: "0.8rem", xs: "0.6rem"}, marginLeft: 10}}> Voir détails </Button>
         </Box>
       </Paper>
     </Grid>
