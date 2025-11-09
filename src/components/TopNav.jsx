@@ -10,16 +10,17 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import GppGoodOutlinedIcon from "@mui/icons-material/GppGoodOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import LoginIcon from "@mui/icons-material/Login";
 import "../styles/Welcom.css";
 import Logo from "./Logo";
+import { useNavigate } from "react-router-dom";
 
 const pages = ["Accueil", "contacts", "signaler"];
 
 function TopNav() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const navigate = useNavigate();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -27,6 +28,10 @@ function TopNav() {
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
+  };
+
+  const goToLogin = () => {
+    navigate("/login");
   };
 
   return (
@@ -123,6 +128,7 @@ function TopNav() {
             }}
             variant="contained"
             startIcon={<LoginIcon />}
+            onClick={goToLogin}
           >
             {" "}
             Connexion{" "}
