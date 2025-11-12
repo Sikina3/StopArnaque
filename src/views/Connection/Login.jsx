@@ -22,22 +22,17 @@ function Login() {
 
     if(window.innerWidth < 900) {
         tl.to(".panel", {
-            y: "140%",
-            duration: 0.4,
+            y: "160%",
+            duration: 0.8,
             ease: "power3.inOut",
-            onComplete: () => setModeLogin(false),
-          });
+          }).call(() => setModeLogin(false), null, "-=0.5");
     } else {
         tl.to(".panel", {
             x: "100%",
-            duration: 0.4,
+            duration: 0.8,
             ease: "power3.inOut",
-            onComplete: () => setModeLogin(false)
-          });
+          }).call(() => setModeLogin(false), null, "-=0.4");
     }
-    // tl.set(".panel", {
-    //   x: "100%",
-    // });
   };
 
   const goLeft = () => {
@@ -45,22 +40,17 @@ function Login() {
     if (window.innerWidth < 900){
         tl.to(".panel", {
             y: "0%",
-            duration: 0.4,
+            duration: 0.8,
             ease: "power3.inOut",
-            onComplete: () => setModeLogin(true),
-          });
+          }).call(() => setModeLogin(true), null, "-=0.5");;
     } else {
         tl.to(".panel", {
             x: "0%",
-            duration: 0.4,
+            duration: 0.8,
             ease: "power3.inOut",
-            onComplete: () => setModeLogin(true),
-          });
+          }).call(() => setModeLogin(true), null, "-=0.4");
     }
 
-    // tl.set(".panel", {
-    //   x: 0,
-    // });
   };
 
   return (
@@ -93,7 +83,7 @@ function Login() {
             position: "absolute",
             display: "flex",
             left: { md: "-50%", xs: "0" },
-            top: { md: "0", xs: "-70%" },
+            top: { md: "0", xs: "-80%" },
             zIndex: 10,
             flexDirection: {md: "row", xs: "column"},
           }}
@@ -103,22 +93,30 @@ function Login() {
             sx={{
               flex: 1,
               display: "flex",
-              justifyContent: "center",
+              flexDirection: "column",
+              justifyContent: {md: "center", },
               alignItems: "center",
+              paddingTop: {md: 0, xs: 2}
             }}
           >
-            <Button onClick={goLeft} variant="outlined" sx={{ borderColor: "white", color: "white"}}>Aller a Gauche</Button>
+            <Typography color="white" sx={{ fontSize: {md: "1.4rem", xs: "1.2rem"}, fontFamily: "Lato", marginBottom: {md: 5, xs: 2} }}> Bonjour, content de vous voir </Typography>
+            <Typography color="white" sx={{ fontSize: {md: "0.8rem", xs: "0.7rem"}, fontFamily: "Lato", marginBottom: {md: 2, xs: 1} }}> Avez vous déja un compte ? </Typography>
+            <Button onClick={goLeft} variant="outlined" sx={{ borderColor: "white", color: "white", fontSize: { md: "1rem", xs: "0.7rem"}}}>Se connecter</Button>
           </Box>
 
           <Box
             sx={{
               flex: 1,
               display: "flex",
-              justifyContent: "center",
+              flexDirection: "column",
+              justifyContent: {md: "center", xs: "end"},
               alignItems: "center",
+              paddingBottom: {md: 0, xs: 2}
             }}
           >
-            <Button onClick={goRight} variant="outlined" sx={{ borderColor: "white", color: "white"}}>Crée un compte</Button>
+            <Typography color="white" sx={{ fontSize: {md: "1.4rem", xs: "1.2rem"}, fontFamily: "Lato", marginBottom: {md: 5, xs: 1} }}> Bonjour, ravie de vous revoir </Typography>
+            <Typography color="white" sx={{ fontSize: {md: "0.8rem", xs: "0.7rem"}, fontFamily: "Lato", marginBottom: {md: 2, xs: 1} }}> Vous n'avez pas encore un compte? </Typography>
+            <Button onClick={goRight} variant="outlined" sx={{ borderColor: "white", color: "white", fontSize: { md: "1rem", xs: "0.7rem"}}}>Crée un compte</Button>
           </Box>
         </Box>
 

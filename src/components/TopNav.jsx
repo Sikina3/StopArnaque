@@ -99,7 +99,7 @@ function TopNav() {
           </Box>
 
           <Box sx={{ display: { xs: "flex", md: "none" } }}>
-            <IconButton aria-label="Login">
+            <IconButton aria-label="Login" onClick={goToLogin}>
               <LoginIcon sx={{ color: "#1F9EF9" }} />
             </IconButton>
           </Box>
