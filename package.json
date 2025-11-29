@@ -16,6 +16,8 @@
     "@mui/icons-material": "^7.3.4",
     "@mui/joy": "^5.0.0-beta.52",
     "@mui/material": "^7.3.4",
+    "@react-oauth/google": "^0.12.2",
+    "axios": "^1.13.2",
     "gsap": "^3.13.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

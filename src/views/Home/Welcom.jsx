@@ -8,7 +8,7 @@ function Welcom() {
       sx={{
         width: "100%",
         display: "flex",
-        marginTop: "64px"
+        marginTop: "64px",
       }}
     >
       <Box p={5} sx={{ display: { md: "flex", xs: "none" }, height: "90vh", }}>

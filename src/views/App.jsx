@@ -7,6 +7,7 @@ import LastSignalement from "./Home/LastSignalement";
 import Footer from "../components/Footer";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./Connection/Login";
+import FormSignal from "./FormSignal";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           }
         />
         <Route path="/login" element={<Login />} />
+        <Route path="/signaler" element={<FormSignal /> } />
       </Routes>
     </BrowserRouter>
   );

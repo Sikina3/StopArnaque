@@ -15,12 +15,16 @@ import LoginIcon from "@mui/icons-material/Login";
 import "../styles/Welcom.css";
 import Logo from "./Logo";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../services/useAuth";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { Dropdown, MenuButton, Menu as JoyMenu, MenuItem as JoyMenuItem } from "@mui/joy";
 
 const pages = ["Accueil", "contacts", "signaler"];
 
 function TopNav() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -32,6 +36,12 @@ function TopNav() {
 
   const goToLogin = () => {
     navigate("/login");
+  };
+
+  const routes = {
+    Accueil : "/",
+    contacts : "/contacts",
+    signaler : "/signaler"
   };
 
   return (
@@ -99,9 +109,15 @@ function TopNav() {
           </Box>
 
           <Box sx={{ display: { xs: "flex", md: "none" } }}>
-            <IconButton aria-label="Login" onClick={goToLogin}>
-              <LoginIcon sx={{ color: "#1F9EF9" }} />
-            </IconButton>
+            {user ? (
+              <AccountCircleIcon sx={{ color: "gray", fontSize: "1.8rem" }}>
+                {user.pseudo ? user.pseudo[0].toUpperCase() : "U"}
+              </AccountCircleIcon>
+            ) : (
+              <IconButton aria-label="Login" onClick={goToLogin}>
+                <LoginIcon sx={{ color: "#1F9EF9" }} />
+              </IconButton>
+            )}
           </Box>
 
           <Box
@@ -114,7 +130,7 @@ function TopNav() {
             {pages.map((page) => (
               <Button
                 key={page}
-                onClick={handleCloseNavMenu}
+                onClick={() => navigate(routes[page])}
                 sx={{ my: 2, color: "black", display: "block" }}
               >
                 {page}
@@ -122,7 +138,25 @@ function TopNav() {
             ))}
           </Box>
 
-          <Button
+          {user ? (
+            <Dropdown>
+              <MenuButton
+                variant="plain"
+                sx={{ p: 0, minWidth: 0}}
+              >
+                <AccountCircleIcon sx={{ color: "gray", fontSize: "2rem", display: { xs: "none", md: "flex"} }}>
+                  {user.pseudo ? user.pseudo[0].toUpperCase() : "U"}
+                </AccountCircleIcon>
+              </MenuButton>
+
+              <JoyMenu>
+                <JoyMenuItem>{user.pseudo || "Profil"}</JoyMenuItem>
+                <JoyMenuItem>Mon compte</JoyMenuItem>
+                <JoyMenuItem>Deconnexion</JoyMenuItem>
+              </JoyMenu>
+            </Dropdown>
+          ) : (
+            <Button
             sx={{
               display: { xs: "none", md: "flex", backgroundColor: "#1F9EF9" },
             }}
@@ -133,6 +167,7 @@ function TopNav() {
             {" "}
             Connexion{" "}
           </Button>
+          )}
         </Toolbar>
       </Container>
     </AppBar>
