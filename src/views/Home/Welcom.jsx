@@ -1,8 +1,11 @@
 import { Box, Button, Input, InputAdornment, Typography } from "@mui/material";
 import "../../styles/Welcom.css";
 import image from "../../assets/bouclier.png";
+import { useNavigate } from "react-router-dom";
 
 function Welcom() {
+  const navigate = useNavigate();
+
   return (
     <Box
       sx={{
@@ -33,6 +36,7 @@ function Welcom() {
               paddingX: 5,
               fontSize: {md: "1rem", xs: "0.6rem"}
             }}
+            onClick={() => navigate("/signaler")}
           >
             Signaler une Arnaque
           </Button>

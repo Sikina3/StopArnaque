@@ -24,7 +24,7 @@ const pages = ["Accueil", "contacts", "signaler"];
 function TopNav() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -152,7 +152,7 @@ function TopNav() {
               <JoyMenu>
                 <JoyMenuItem>{user.pseudo || "Profil"}</JoyMenuItem>
                 <JoyMenuItem>Mon compte</JoyMenuItem>
-                <JoyMenuItem>Deconnexion</JoyMenuItem>
+                <JoyMenuItem onClick={logout}>Deconnexion</JoyMenuItem>
               </JoyMenu>
             </Dropdown>
           ) : (

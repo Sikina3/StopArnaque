@@ -1,16 +1,38 @@
 import { Box, selectClasses, Typography } from "@mui/material";
 import TopNav from "../components/TopNav";
 import Footer from "../components/Footer";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Checkbox, Input, Option, Select, Step, StepButton, StepIndicator, Stepper, Textarea } from "@mui/joy";
 import { Check, FileOpen, KeyboardArrowDown } from "@mui/icons-material";
 import FilePicker from "../components/FilePicker";
+import useAuth from "../services/useAuth";
+import api from "../services/api";
 
 const steps = ['type et details', 'Preuves et pieces justificatives', 'Vos coordonnées (Confidentiel)'];
 
 function FormSignal() {
     const [activeStep, setActiveStep] = useState(0);
     const [proofs, setProofs] = useState([]);
+    const {user} = useAuth();
+
+    const [type, setType] = useState("");
+    const [scammerName, setScammerName] = useState("");
+    const [contact, setContact] = useState("");
+    const [description, setDescription] = useState("");
+
+    const [fullName, setFullName] = useState("");
+    const [city, setCity] = useState("");
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+
+    useEffect(() => {
+        if (user) {
+            setFullName(user?.name || "");
+            setCity(user?.ville || "");
+            setEmail(user?.email || "");
+            setPhone(user?.phone || "");
+        }
+    }, [user]);
 
     const handleAddProofs = (files) => {
         if (proofs.length + files.length > 6) return;
@@ -18,41 +40,76 @@ function FormSignal() {
         setProofs(prev => [...prev, ...files].slice(0, 6));
     };
 
+    const handleSUbmit = async () => {
+        try {
+            const formData = {
+                nom: scammerName,
+                contact: contact,
+                description: description,
+                titre: "Arnaque sur" + type + " " + city,
+                type: type,
+                utilisateur_id: user?.id,
+                preuves: proofs.map(f => f.name),
+            };
+
+            const res = await api.post("/signalements", formData);
+
+            const userData = {
+                name: user?.name || fullName,
+                ville: user?.ville || city,
+                email: user?.email || email,
+                phone: user?.phone || phone
+            }
+
+            const resUser = await api.put(`/users/${user.id}`, userData);
+
+            console.log("Enregistrer avec succes! ")
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     const Step0 = (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "50%" }}>
-            <Typography sx={{ marginBottom: 1 }}>Type d'arnaques *</Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: {md: 500, xs: 400} }}>
+            <Typography sx={{ marginBottom: 1, fontSize: {xs: "0.8rem", md: "1rem"} }}>Type d'arnaques *</Typography>
             <Select
                 placeholder="selectionner"
                 indicator={<KeyboardArrowDown />}
+                value={type}
+                onChange={(e, newValue) => setType(newValue)}
                 sx={{
-                    width: 500,
+                    // width: {},
                     [`& .${selectClasses.indicator}`]: {
                         transition: '0.2s',
                         [`&.${selectClasses.expanded}`]: { transform: 'rotate(-180deg)' },
                     },
+                    fontSize: {xs: "0.8rem", md: "1rem"}
                 }}
             >
-                <Option value="Phishing">Phishing</Option>
-                <Option value="Hack de compte">Hack de compte</Option>
-                <Option value="Faux vendeurs / Faux acheteurs">Faux vendeurs / Faux acheteurs</Option>
-                <Option value="Colis bloqué">Colis bloqué</Option>
+                <Option sx={{ fontSize: {xs: "0.8rem", md: "1rem"} }} value="Phishing">Phishing</Option>
+                <Option sx={{ fontSize: {xs: "0.8rem", md: "1rem"} }} value="Hack de compte">Hack de compte</Option>
+                <Option sx={{ fontSize: {xs: "0.8rem", md: "1rem"} }} value="Faux vendeurs / Faux acheteurs">Faux vendeurs / Faux acheteurs</Option>
+                <Option sx={{ fontSize: {xs: "0.8rem", md: "1rem"} }} value="Colis bloqué">Colis bloqué</Option>
             </Select>
 
-            <Typography sx={{ marginBottom: 1, marginTop: 3 }}>Nom / Entreprise *</Typography>
-            <Input placeholder="Nom de la personne ou de l'entreprise" />
+            <Typography sx={{ marginBottom: 1, marginTop: 3, fontSize: {xs: "0.8rem", md: "1rem"} }}>Nom / Entreprise *</Typography>
+            <Input sx={{ fontSize: {xs: "0.8rem", md: "1rem"} }} placeholder="Nom de la personne ou de l'entreprise" value={scammerName} onChange={(e) => setScammerName(e.target.value)}/>
 
-            <Typography sx={{ marginBottom: 1, marginTop: 3 }}>Description et detaille de l'arnaque *</Typography>
-            <Textarea placeholder="Raconter nous en quelques ligne ce qu'on vous a fait..." minRows={4} />
+            <Typography sx={{ marginBottom: 1, marginTop: 3, fontSize: {xs: "0.8rem", md: "1rem"} }}>Contact de l'Arnaqueur</Typography>
+            <Input sx={{fontSize: {xs: "0.8rem", md: "1rem"}}} placeholder="Nom sur facebook, ou numero de telephone... etc" value={contact} onChange={(e) => setContact(e.target.value)}/>
+
+            <Typography sx={{ marginBottom: 1, marginTop: 3, fontSize: {xs: "0.8rem", md: "1rem"} }}>Description et detaille de l'arnaque *</Typography>
+            <Textarea sx={{fontSize: {xs: "0.8rem", md: "1rem"}}} placeholder="Raconter nous en quelques ligne ce qu'on vous a fait..." minRows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
         </Box>
     );
 
     const Step1 = (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "50%" }}>
-            <Typography sx={{ fontSize: "1.2rem", fontWeight: 600}}>Preuves et pièces justificatives</Typography>
-            <Typography sx={{ fontSize: "0.8rem", color: "#565d6d" }}>Ajoutez tout document, image ou lien qui pourrait appuyer votre signalement.</Typography>
-            <Typography sx={{ fontSize: "1rem", color: "#565d6d", marginTop: 2 }}>Telecharger les preuves *</Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: {md: 500, xs: 400}  }}>
+            <Typography sx={{ fontSize: {xs: "1rem", md: "1.2rem"}, fontWeight: 600}}>Preuves et pièces justificatives</Typography>
+            <Typography sx={{ fontSize: {md: "0.8rem", xs: "0.6rem"}, color: "#565d6d" }}>Ajoutez tout document, image ou lien qui pourrait appuyer votre signalement.</Typography>
+            <Typography sx={{ fontSize: {md: "1rem", xs: "0.8rem"}, color: "#565d6d", marginTop: 2 }}>Telecharger les preuves *</Typography>
             
-            <Box sx={{ marginTop: 1, marginBottom: 2}}>
+            <Box sx={{ marginTop: 1, marginBottom: 2, }}>
                 <FilePicker onFilesSelected={handleAddProofs}/>
             </Box>
 
@@ -62,7 +119,7 @@ function FormSignal() {
                         padding: "8px 12px",
                         borderRadius: "8px",
                         backgroundColor: "#f3f3f3",
-                        fontSize: "0.9rem"
+                        fontSize: {md: "0.9rem", xs: "0.6rem"}
                     }}>
                         {file.name}
                     </Box>
@@ -72,19 +129,33 @@ function FormSignal() {
     );
 
     const Step2 = (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "50%" }}>
-            <Typography sx={{ fontSize: "1.2rem", fontWeight: 600}}>Vos coordonnées (Confidentiel)</Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: {md: 500, xs: 400} }}>
+            <Typography sx={{ fontSize: {md: "1.2rem", xs: "1rem"}, fontWeight: 600}}>Vos coordonnées (Confidentiel)</Typography>
             
-            <Typography sx={{ marginTop: 2}}>Votre nom Complet *</Typography>
-            <Input placeholder="Nom complet" sx={{ mt: 2, width: 500 }} />
-            <Typography sx={{ marginTop: 1}}>Dans quelle ville etes vous? *</Typography>
-            <Input placeholder="Ville" sx={{ mt: 2, width: 500 }} />
-            <Typography sx={{ marginTop: 1}}>Votre adresse email</Typography>
-            <Input placeholder="Email" sx={{ mt: 2, width: 500 }} />
-            <Typography sx={{ marginTop: 1}}>Numero de Telephone</Typography>
-            <Input placeholder="Téléphone" sx={{ mt: 2 }} />
+            <Typography sx={{ marginTop: 2, fontSize: {md: "1rem", xs: "0.8rem"}}}>Votre nom Complet *</Typography>
+            <Input placeholder="Nom complet" 
+                sx={{ mt: 1, fontSize: {md: "1rem", xs: "0.8rem"} }}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)} />
+            
+            <Typography sx={{ marginTop: 1, fontSize: {md: "1rem", xs: "0.8rem"}}}>Dans quelle ville etes vous? *</Typography>
+            <Input placeholder="Ville" 
+                sx={{ mt: 1, fontSize: {md: "1rem", xs: "0.8rem"}}}
+                value={city}
+                onChange={(e) => setCity(e.target.value)} />
+            
+            <Typography sx={{ marginTop: 1, fontSize: {md: "1rem", xs: "0.8rem"}}}>Votre adresse email</Typography>
+            <Input placeholder="Email" 
+                sx={{ mt: 1, fontSize: {md: "1rem", xs: "0.8rem"}}}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)} />
 
-            <Checkbox label="J'accepte les Conditions Generales et la politiques de confidentialité" sx={{ marginTop: 1}}/>
+            <Typography sx={{ marginTop: 1, fontSize: {md: "1rem", xs: "0.8rem"}}}>Numero de Telephone</Typography>
+            <Input placeholder="Téléphone" sx={{ mt: 1, fontSize: {md: "1rem", xs: "0.8rem"} }}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)} />
+
+            <Checkbox label="J'accepte les Conditions Generales et la politiques de confidentialité" sx={{ marginTop: 3, fontSize: {md: "1rem", xs: "0.6rem"}}}/>
         </Box>
     );
 
@@ -99,9 +170,8 @@ function FormSignal() {
                 height: "100vh",
                 display: "flex",
                 flexDirection: "column",
-                // justifyContent: "center",
                 alignItems: "center",
-                paddingX: 20
+                paddingX: {md: 15, xs: 8}
             }}>
                 <Stepper sx={{ width: '100%', marginBottom: 6 }}>
                     {steps.map((label, index) => (
@@ -119,12 +189,14 @@ function FormSignal() {
                                 activeStep > index && index !== 2 && { '&::after': { bgcolor: 'primary.solidBg' } },
                             ]}
                         >
-                            <StepButton onClick={() => setActiveStep(index)}>{label}</StepButton>
+                            <StepButton 
+                                onClick={() => setActiveStep(index)}
+                                sx={{ display: {xs: "none", md: "block"} }}>{label}</StepButton>
                         </Step>
                     ))}
                 </Stepper>
                 
-                <Typography sx={{ fontSize: "1.8rem", fontWeight: 600, fontFamily: "Lato", marginBottom: 5 }}>
+                <Typography sx={{ fontSize:{md: "1.8rem", xs: "1.2rem"}, fontWeight: 600, fontFamily: "Lato", marginBottom: 5 }}>
                     Signaler une Arnaque
                 </Typography>
 
@@ -133,7 +205,7 @@ function FormSignal() {
                 <Box sx={{
                     display: "flex",
                     justifyContent: "space-between",
-                    width: 500,
+                    width:{xs: "100%", md: 500},
                     marginTop: 6
                 }}>
                     <Button 
@@ -145,8 +217,9 @@ function FormSignal() {
                             border: "1px solid #ccc",
                             background: activeStep === 0 ? "#eee" : "white",
                             color: activeStep > 0 ? "2e7d32" : "gray",
-                            cursor: activeStep === 0 ? "not-allowed" : "pointer"
+                            cursor: activeStep === 0 ? "not-allowed" : "pointer",
                         }}
+                        sx={{fontSize: {xs: "0.8rem", md: "1rem"}}}
                     >
                         Precedent
                     </Button>
@@ -160,21 +233,24 @@ function FormSignal() {
                                 background: "#1976d2",
                                 color: "white",
                                 border: "none",
-                                cursor: "pointer"
+                                cursor: "pointer",
+                                fontSize: {xs: "0.8rem", md: "1rem"}
                             }}
+                            sx={{fontSize: {xs: "0.8rem", md: "1rem"}}}
                         >
                             Suivant
                         </Button>
                     ) : (
-                        <Button onClick={() => alert("Formulaire bien soumis!")}
+                        <Button onClick={handleSUbmit}
                         style={{
                             padding: "10px 20px",
                             borderRadius: "6px",
                             background: "2e7d32",
                             color: "white",
                             border: "none",
-                            cursor: "pointer"
-                        }}>
+                            cursor: "pointer",
+                        }}
+                        >
                             Envoyer
                         </Button>
                     )}

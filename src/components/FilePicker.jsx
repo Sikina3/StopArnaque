@@ -17,7 +17,7 @@ function FilePicker({ onFilesSelected }) {
                 onChange={handleChange}
             />
             <label htmlFor="file-upload">
-                <Button component="span" variant="soft">
+                <Button component="span" variant="soft" sx={{ fontSize: {xs: "0.8rem", md: "1rem"} }}>
                     Importer des fichiers
                 </Button>
             </label>
