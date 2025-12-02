@@ -77,6 +77,7 @@ function Welcom() {
               borderColor: "#bdc1ca",
               paddingX: 5,
             }}
+            onClick={() => navigate("/signaler")}
           >
             Signaler une Arnaque
           </Button>

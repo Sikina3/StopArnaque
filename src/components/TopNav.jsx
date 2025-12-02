@@ -88,7 +88,7 @@ function TopNav() {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                <MenuItem key={page} onClick={() => navigate(routes[page])}>
                   <Typography sx={{ textAlign: "center", fontFamily: "Lato" }}>
                     {page}
                   </Typography>
