@@ -1,5 +1,5 @@
 import { Input } from "@mui/joy";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, Snackbar, Alert, CircularProgress } from "@mui/material";
 import Divider from '@mui/material/Divider';
 import FacebookOutlinedIcon from '@mui/icons-material/FacebookOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -10,23 +10,38 @@ import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useState } from "react";
 import api from "../../services/api";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
-function Signup(){
+function Signup() {
   const [pseudo, setPseudo] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   const handleSignup = async () => {
-    if (!pseudo || !phone || !password || !passwordConfirm){
-      alert("Remplis toutes les informations.");
+    if (!pseudo || !phone || !password || !passwordConfirm) {
+      setSnackbar({ open: true, message: "Veuillez remplir toutes les informations.", severity: "warning" });
       return;
     }
 
-    if (password !== passwordConfirm){
-      alert("Les mots de passe ne correspondent pas");
+    if (password !== passwordConfirm) {
+      setSnackbar({ open: true, message: "Les mots de passe ne correspondent pas.", severity: "warning" });
       return;
     }
+
+    setLoading(true);
 
     try {
       const res = await api.post("/users", {
@@ -36,71 +51,212 @@ function Signup(){
       });
 
       console.log("Inscription reussi : ", res.data);
-      alert("Compte crée !");
-    } catch (err){
+
+      localStorage.setItem("user", JSON.stringify(res.data));
+      setSnackbar({ open: true, message: "Compte créé avec succès ! Redirection...", severity: "success" });
+
+      setTimeout(() => {
+        setUser(res.data);
+        navigate("/");
+      }, 1500);
+
+    } catch (err) {
       console.log(err);
-      alert("Erreur lors de l'inscription");
+      setSnackbar({ open: true, message: "Erreur lors de l'inscription. Veuillez réessayer.", severity: "error" });
+      setLoading(false);
     }
   };
 
-    const loginWithGoogle = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-          try {
-            const userInfo = await axios.get(
-              `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokenResponse.access_token}`
-            );
-            const googleUser = userInfo.data;
-      
-            console.log("USER GOOGLE :", googleUser);
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const userInfo = await axios.get(
+          `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokenResponse.access_token}`
+        );
+        const googleUser = userInfo.data;
 
-            const pwdAuto = Math.random().toString(36).slice(-10);
+        console.log("USER GOOGLE :", googleUser);
 
-            const res = await api.post("/users", {
-              pseudo: googleUser.given_name,
-              email: googleUser.email,
-              password: pwdAuto,
-            });
+        const pwdAuto = Math.random().toString(36).slice(-10);
 
-            console.log("Inscription google ok: ", res.data);
-            alert("Inscription via google reussie");
-          } catch (err) {
-            console.log(err);
-            alert("Erreur google login");
+        const res = await api.post("/users", {
+          pseudo: googleUser.given_name,
+          email: googleUser.email,
+          password: pwdAuto,
+        });
+
+        console.log("Inscription google ok: ", res.data);
+
+        localStorage.setItem("user", JSON.stringify(res.data));
+        setSnackbar({ open: true, message: "Inscription via Google réussie ! Redirection...", severity: "success" });
+
+        setTimeout(() => {
+          setUser(res.data);
+          navigate("/");
+        }, 1500);
+
+      } catch (err) {
+        console.log(err);
+        setSnackbar({ open: true, message: "Erreur lors de l'inscription Google.", severity: "error" });
+      }
+    },
+    onError: () => {
+      setSnackbar({ open: true, message: "Erreur de connexion Google.", severity: "error" });
+    }
+  });
+
+  return (
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", px: 2 }}>
+      <Typography sx={{
+        fontWeight: 800,
+        fontSize: { md: "1.8rem", xs: "1.4rem" },
+        marginBottom: 4,
+        fontFamily: "Lato",
+        background: "linear-gradient(135deg, #1F9EF9 0%, #0056b3 100%)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+      }}>Créer un compte</Typography>
+
+      <Input
+        placeholder="Pseudo"
+        value={pseudo}
+        onChange={(e) => setPseudo(e.target.value)}
+        sx={{
+          fontSize: { md: "0.9rem", xs: "0.8rem" },
+          fontFamily: "Lato",
+          width: "70%",
+          marginBottom: 2,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          "&:focus-within": {
+            boxShadow: "0 4px 12px rgba(31, 158, 249, 0.2)"
           }
-        },
-        onError: () => {
-          console.log("Erreur Google login");
-        }
-      });
+        }}
+        endDecorator={<PersonIcon fontSize="small" sx={{ color: "#1F9EF9" }} />}
+      />
+      <Input
+        placeholder="Numéro de téléphone"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        sx={{
+          fontSize: { md: "0.9rem", xs: "0.8rem" },
+          fontFamily: "Lato",
+          width: "70%",
+          marginBottom: 2,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          "&:focus-within": {
+            boxShadow: "0 4px 12px rgba(31, 158, 249, 0.2)"
+          }
+        }}
+        endDecorator={<PhoneIcon fontSize="small" sx={{ color: "#1F9EF9" }} />}
+      />
+      <Input
+        type="password"
+        placeholder="Mot de passe"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        sx={{
+          fontSize: { md: "0.9rem", xs: "0.8rem" },
+          fontFamily: "Lato",
+          width: "70%",
+          marginBottom: 2,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          "&:focus-within": {
+            boxShadow: "0 4px 12px rgba(31, 158, 249, 0.2)"
+          }
+        }}
+        endDecorator={<HttpsIcon fontSize="small" sx={{ color: "#1F9EF9" }} />}
+      />
+      <Input
+        type="password"
+        placeholder="Confirmer le mot de passe"
+        value={passwordConfirm}
+        onChange={(e) => setConfirm(e.target.value)}
+        sx={{
+          fontSize: { md: "0.9rem", xs: "0.8rem" },
+          fontFamily: "Lato",
+          width: "70%",
+          marginBottom: 3,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          "&:focus-within": {
+            boxShadow: "0 4px 12px rgba(31, 158, 249, 0.2)"
+          }
+        }}
+        endDecorator={<HttpsIcon fontSize="small" sx={{ color: "#1F9EF9" }} />}
+      />
 
-    return (
-        <Box sx={{ height: "100%", display: "flex",flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
-            <Typography sx={{
-                fontWeight: 700,
-                fontSize: {md: "1.4rem", xs: "1.2rem"},
-                marginBottom: 4,
-                fontFamily: "Lato"
-            }}> Crée un compte </Typography>
+      <Button
+        variant="contained"
+        disabled={loading}
+        sx={{
+          width: "70%",
+          marginBottom: 3,
+          fontSize: { md: "0.95rem", xs: "0.85rem" },
+          fontFamily: "Lato",
+          height: "44px",
+          borderRadius: 3,
+          fontWeight: 700,
+          textTransform: "none",
+          background: "linear-gradient(45deg, #1F9EF9 30%, #21CBF3 90%)",
+          boxShadow: "0 4px 14px 0 rgba(31, 158, 249, 0.4)",
+          "&:hover": {
+            background: "linear-gradient(45deg, #008ae6 30%, #00b4d8 90%)",
+            boxShadow: "0 6px 20px 0 rgba(31, 158, 249, 0.6)"
+          }
+        }}
+        onClick={handleSignup}
+      >
+        {loading ? <CircularProgress size={24} color="inherit" /> : "S'inscrire"}
+      </Button>
 
-            <Input placeholder="Pseudo" value={pseudo} onChange={(e) => setPseudo(e.target.value)} sx={{ fontSize: {md: "0.9rem", xs: "0.8rem"}, fontFamily: "Lato" , width: "60%", marginBottom: 1}} endDecorator={<PersonIcon fontSize="8"/>}/>
-            <Input placeholder="numero tel" value={phone} onChange={(e) => setPhone(e.target.value)} sx={{ fontSize: {md: "0.9rem", xs: "0.8rem"}, fontFamily: "Lato" , width: "60%", marginBottom: 1}} endDecorator={<PhoneIcon fontSize="8"/>}/>
-            <Input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} sx={{ fontSize: {md: "0.9rem", xs: "0.8rem"}, fontFamily: "Lato" , width: "60%", marginBottom: 1}} endDecorator={<HttpsIcon fontSize="8"/>}/>
-            <Input type="password" placeholder="Confirmation Mot de passe" value={passwordConfirm} onChange={(e) => setConfirm(e.target.value)} sx={{ fontSize: {md: "0.9rem", xs: "0.8rem"}, fontFamily: "Lato" , width: "60%", marginBottom: 3}} endDecorator={<HttpsIcon fontSize="8"/>}/>
+      <Box sx={{ display: "flex", width: "70%", alignItems: "center", marginBottom: 3 }}>
+        <Divider sx={{ flex: 1 }} />
+        <Typography sx={{ mx: 2, fontSize: { md: "0.75rem", xs: "0.65rem" }, fontFamily: "Lato", color: "#999" }}>Ou</Typography>
+        <Divider sx={{ flex: 1 }} />
+      </Box>
 
-            <Button variant="contained" sx={{ width: "60%", marginBottom: 1, fontSize: {md: "0.9rem", xs: "0.8rem"}, fontFamily: "Lato" }} onClick={handleSignup}> S'inscrire </Button>
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <Button
+          variant="outlined"
+          onClick={loginWithGoogle}
+          sx={{
+            borderRadius: 2,
+            px: 3,
+            py: 1,
+            borderColor: "#e0e0e0",
+            color: "#DB4437",
+            "&:hover": {
+              borderColor: "#DB4437",
+              backgroundColor: "rgba(219, 68, 55, 0.05)"
+            }
+          }}
+        >
+          <GoogleIcon sx={{ fontSize: { md: "1.5rem", xs: "1.2rem" } }} />
+        </Button>
+        <Button
+          variant="outlined"
+          sx={{
+            borderRadius: 2,
+            px: 3,
+            py: 1,
+            borderColor: "#e0e0e0",
+            color: "#4267B2",
+            "&:hover": {
+              borderColor: "#4267B2",
+              backgroundColor: "rgba(66, 103, 178, 0.05)"
+            }
+          }}
+        >
+          <FacebookOutlinedIcon sx={{ fontSize: { md: "1.5rem", xs: "1.2rem" } }} />
+        </Button>
+      </Box>
 
-            <Box sx={{ display: "flex", width: "100%", alignItems: "center", paddingX: 10, marginBottom: 1}}>
-                <Divider sx={{ flex: 1}}/>
-                <Typography sx={{ mx: 2, fontSize: {md: "0.7rem", xs: "0.6rem"},  fontFamily: "Lato" }}> Ou </Typography>
-                <Divider sx={{ flex: 1}}/>
-            </Box>
-
-            <Box>
-                <Button variant="outlined" sx={{ marginRight: 2 }} onClick={loginWithGoogle}> <GoogleIcon sx={{ fontSize: {md: "1.5rem", xs: "1rem"}}} /> </Button>
-                <Button variant="outlined"> <FacebookOutlinedIcon sx={{ fontSize: {md: "1.5rem", xs: "1rem"}}} /> </Button>
-            </Box>
-        </Box>
-    )
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Box>
+  )
 }
 
 export default Signup;

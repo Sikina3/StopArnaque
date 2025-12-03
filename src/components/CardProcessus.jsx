@@ -1,40 +1,56 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Paper } from "@mui/material";
 
-function CardProcessus({ titre, icon, contenu }) {
+function CardProcessus({ titre, icon, contenu, color = "#1F9EF9" }) {
   return (
-    <Box
+    <Paper
+      elevation={0}
       sx={{
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         textAlign: "center",
-        p: 3,
-        borderRadius: 3,
-        boxShadow: "0px 2px 10px rgba(0,0,0,0.1)",
-        backgroundColor: "#fff",
-        transition: "transform 0.3s ease",
+        p: 4,
+        height: '100%',
+        borderRadius: 4,
+        backgroundColor: "#f8f9fa",
+        transition: "all 0.3s ease",
+        border: "1px solid transparent",
         "&:hover": {
-          transform: "translateY(-5px)",
-          boxShadow: "0px 4px 14px rgba(0,0,0,0.15)",
+          transform: "translateY(-8px)",
+          backgroundColor: "#fff",
+          borderColor: color,
+          boxShadow: `0 10px 30px -10px ${color}40`, // 40 is for opacity
         },
-        width: {xs: "90%", sm: "70%", md: "25%"},
-        marginX: {xs: 0, md: 2},
-        marginBottom: {xs: 4, md: 0},
       }}
     >
-      <Box sx={{ color: "#007bff", mb: 2 }}>{icon}</Box>
+      <Box
+        sx={{
+          color: color,
+          mb: 3,
+          p: 2,
+          borderRadius: '50%',
+          backgroundColor: `${color}15`, // 15% opacity background
+          fontSize: '3rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        {icon}
+      </Box>
 
       <Typography
+        variant="h6"
         fontWeight={700}
-        sx={{ mb: 1, fontFamily: "Lato", fontSize: {xs: "1rem", md: "1.25rem"} }}
+        sx={{ mb: 2, fontFamily: "Lato" }}
       >
         {titre}
       </Typography>
 
-      <Typography sx={{ color: "#555", fontFamily: "Lato", fontSize: {xs: "0.8rem", md: "1rem"}, marginTop: {xs: 0, md: 2} }}>
+      <Typography variant="body2" sx={{ color: "#666", fontFamily: "Lato", lineHeight: 1.6 }}>
         {contenu}
       </Typography>
-    </Box>
+    </Paper>
   );
 }
 

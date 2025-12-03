@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Checkbox, Input, Option, Select, Step, StepButton, StepIndicator, Stepper, Textarea } from "@mui/joy";
 import { Check, FileOpen, KeyboardArrowDown } from "@mui/icons-material";
 import FilePicker from "../components/FilePicker";
-import useAuth from "../services/useAuth";
+import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 
 const steps = ['type et details', 'Preuves et pieces justificatives', 'Vos coordonnées (Confidentiel)'];
@@ -13,7 +13,7 @@ const steps = ['type et details', 'Preuves et pieces justificatives', 'Vos coord
 function FormSignal() {
     const [activeStep, setActiveStep] = useState(0);
     const [proofs, setProofs] = useState([]);
-    const {user} = useAuth();
+    const { user } = useAuth();
 
     const [type, setType] = useState("");
     const [scammerName, setScammerName] = useState("");
@@ -70,8 +70,8 @@ function FormSignal() {
     }
 
     const Step0 = (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: {md: 500, xs: 400} }}>
-            <Typography sx={{ marginBottom: 1, fontSize: {xs: "0.8rem", md: "1rem"} }}>Type d'arnaques *</Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: { md: 500, xs: 400 } }}>
+            <Typography sx={{ marginBottom: 1, fontSize: { xs: "0.8rem", md: "1rem" } }}>Type d'arnaques *</Typography>
             <Select
                 placeholder="selectionner"
                 indicator={<KeyboardArrowDown />}
@@ -83,34 +83,34 @@ function FormSignal() {
                         transition: '0.2s',
                         [`&.${selectClasses.expanded}`]: { transform: 'rotate(-180deg)' },
                     },
-                    fontSize: {xs: "0.8rem", md: "1rem"}
+                    fontSize: { xs: "0.8rem", md: "1rem" }
                 }}
             >
-                <Option sx={{ fontSize: {xs: "0.8rem", md: "1rem"} }} value="Phishing">Phishing</Option>
-                <Option sx={{ fontSize: {xs: "0.8rem", md: "1rem"} }} value="Hack de compte">Hack de compte</Option>
-                <Option sx={{ fontSize: {xs: "0.8rem", md: "1rem"} }} value="Faux vendeurs / Faux acheteurs">Faux vendeurs / Faux acheteurs</Option>
-                <Option sx={{ fontSize: {xs: "0.8rem", md: "1rem"} }} value="Colis bloqué">Colis bloqué</Option>
+                <Option sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} value="Phishing">Phishing</Option>
+                <Option sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} value="Hack de compte">Hack de compte</Option>
+                <Option sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} value="Faux vendeurs / Faux acheteurs">Faux vendeurs / Faux acheteurs</Option>
+                <Option sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} value="Colis bloqué">Colis bloqué</Option>
             </Select>
 
-            <Typography sx={{ marginBottom: 1, marginTop: 3, fontSize: {xs: "0.8rem", md: "1rem"} }}>Nom / Entreprise *</Typography>
-            <Input sx={{ fontSize: {xs: "0.8rem", md: "1rem"} }} placeholder="Nom de la personne ou de l'entreprise" value={scammerName} onChange={(e) => setScammerName(e.target.value)}/>
+            <Typography sx={{ marginBottom: 1, marginTop: 3, fontSize: { xs: "0.8rem", md: "1rem" } }}>Nom / Entreprise *</Typography>
+            <Input sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} placeholder="Nom de la personne ou de l'entreprise" value={scammerName} onChange={(e) => setScammerName(e.target.value)} />
 
-            <Typography sx={{ marginBottom: 1, marginTop: 3, fontSize: {xs: "0.8rem", md: "1rem"} }}>Contact de l'Arnaqueur</Typography>
-            <Input sx={{fontSize: {xs: "0.8rem", md: "1rem"}}} placeholder="Nom sur facebook, ou numero de telephone... etc" value={contact} onChange={(e) => setContact(e.target.value)}/>
+            <Typography sx={{ marginBottom: 1, marginTop: 3, fontSize: { xs: "0.8rem", md: "1rem" } }}>Contact de l'Arnaqueur</Typography>
+            <Input sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} placeholder="Nom sur facebook, ou numero de telephone... etc" value={contact} onChange={(e) => setContact(e.target.value)} />
 
-            <Typography sx={{ marginBottom: 1, marginTop: 3, fontSize: {xs: "0.8rem", md: "1rem"} }}>Description et detaille de l'arnaque *</Typography>
-            <Textarea sx={{fontSize: {xs: "0.8rem", md: "1rem"}}} placeholder="Raconter nous en quelques ligne ce qu'on vous a fait..." minRows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Typography sx={{ marginBottom: 1, marginTop: 3, fontSize: { xs: "0.8rem", md: "1rem" } }}>Description et detaille de l'arnaque *</Typography>
+            <Textarea sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} placeholder="Raconter nous en quelques ligne ce qu'on vous a fait..." minRows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
         </Box>
     );
 
     const Step1 = (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: {md: 500, xs: 400}  }}>
-            <Typography sx={{ fontSize: {xs: "1rem", md: "1.2rem"}, fontWeight: 600}}>Preuves et pièces justificatives</Typography>
-            <Typography sx={{ fontSize: {md: "0.8rem", xs: "0.6rem"}, color: "#565d6d" }}>Ajoutez tout document, image ou lien qui pourrait appuyer votre signalement.</Typography>
-            <Typography sx={{ fontSize: {md: "1rem", xs: "0.8rem"}, color: "#565d6d", marginTop: 2 }}>Telecharger les preuves *</Typography>
-            
+        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: { md: 500, xs: 400 } }}>
+            <Typography sx={{ fontSize: { xs: "1rem", md: "1.2rem" }, fontWeight: 600 }}>Preuves et pièces justificatives</Typography>
+            <Typography sx={{ fontSize: { md: "0.8rem", xs: "0.6rem" }, color: "#565d6d" }}>Ajoutez tout document, image ou lien qui pourrait appuyer votre signalement.</Typography>
+            <Typography sx={{ fontSize: { md: "1rem", xs: "0.8rem" }, color: "#565d6d", marginTop: 2 }}>Telecharger les preuves *</Typography>
+
             <Box sx={{ marginTop: 1, marginBottom: 2, }}>
-                <FilePicker onFilesSelected={handleAddProofs}/>
+                <FilePicker onFilesSelected={handleAddProofs} />
             </Box>
 
             <Box>
@@ -119,7 +119,7 @@ function FormSignal() {
                         padding: "8px 12px",
                         borderRadius: "8px",
                         backgroundColor: "#f3f3f3",
-                        fontSize: {md: "0.9rem", xs: "0.6rem"}
+                        fontSize: { md: "0.9rem", xs: "0.6rem" }
                     }}>
                         {file.name}
                     </Box>
@@ -129,33 +129,33 @@ function FormSignal() {
     );
 
     const Step2 = (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: {md: 500, xs: 400} }}>
-            <Typography sx={{ fontSize: {md: "1.2rem", xs: "1rem"}, fontWeight: 600}}>Vos coordonnées (Confidentiel)</Typography>
-            
-            <Typography sx={{ marginTop: 2, fontSize: {md: "1rem", xs: "0.8rem"}}}>Votre nom Complet *</Typography>
-            <Input placeholder="Nom complet" 
-                sx={{ mt: 1, fontSize: {md: "1rem", xs: "0.8rem"} }}
+        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: { md: 500, xs: 400 } }}>
+            <Typography sx={{ fontSize: { md: "1.2rem", xs: "1rem" }, fontWeight: 600 }}>Vos coordonnées (Confidentiel)</Typography>
+
+            <Typography sx={{ marginTop: 2, fontSize: { md: "1rem", xs: "0.8rem" } }}>Votre nom Complet *</Typography>
+            <Input placeholder="Nom complet"
+                sx={{ mt: 1, fontSize: { md: "1rem", xs: "0.8rem" } }}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)} />
-            
-            <Typography sx={{ marginTop: 1, fontSize: {md: "1rem", xs: "0.8rem"}}}>Dans quelle ville etes vous? *</Typography>
-            <Input placeholder="Ville" 
-                sx={{ mt: 1, fontSize: {md: "1rem", xs: "0.8rem"}}}
+
+            <Typography sx={{ marginTop: 1, fontSize: { md: "1rem", xs: "0.8rem" } }}>Dans quelle ville etes vous? *</Typography>
+            <Input placeholder="Ville"
+                sx={{ mt: 1, fontSize: { md: "1rem", xs: "0.8rem" } }}
                 value={city}
                 onChange={(e) => setCity(e.target.value)} />
-            
-            <Typography sx={{ marginTop: 1, fontSize: {md: "1rem", xs: "0.8rem"}}}>Votre adresse email</Typography>
-            <Input placeholder="Email" 
-                sx={{ mt: 1, fontSize: {md: "1rem", xs: "0.8rem"}}}
+
+            <Typography sx={{ marginTop: 1, fontSize: { md: "1rem", xs: "0.8rem" } }}>Votre adresse email</Typography>
+            <Input placeholder="Email"
+                sx={{ mt: 1, fontSize: { md: "1rem", xs: "0.8rem" } }}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)} />
 
-            <Typography sx={{ marginTop: 1, fontSize: {md: "1rem", xs: "0.8rem"}}}>Numero de Telephone</Typography>
-            <Input placeholder="Téléphone" sx={{ mt: 1, fontSize: {md: "1rem", xs: "0.8rem"} }}
+            <Typography sx={{ marginTop: 1, fontSize: { md: "1rem", xs: "0.8rem" } }}>Numero de Telephone</Typography>
+            <Input placeholder="Téléphone" sx={{ mt: 1, fontSize: { md: "1rem", xs: "0.8rem" } }}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)} />
 
-            <Checkbox label="J'accepte les Conditions Generales et la politiques de confidentialité" sx={{ marginTop: 3, fontSize: {md: "1rem", xs: "0.6rem"}}}/>
+            <Checkbox label="J'accepte les Conditions Generales et la politiques de confidentialité" sx={{ marginTop: 3, fontSize: { md: "1rem", xs: "0.6rem" } }} />
         </Box>
     );
 
@@ -171,7 +171,7 @@ function FormSignal() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                paddingX: {md: 15, xs: 8}
+                paddingX: { md: 15, xs: 8 }
             }}>
                 <Stepper sx={{ width: '100%', marginBottom: 6 }}>
                     {steps.map((label, index) => (
@@ -189,14 +189,14 @@ function FormSignal() {
                                 activeStep > index && index !== 2 && { '&::after': { bgcolor: 'primary.solidBg' } },
                             ]}
                         >
-                            <StepButton 
+                            <StepButton
                                 onClick={() => setActiveStep(index)}
-                                sx={{ display: {xs: "none", md: "block"} }}>{label}</StepButton>
+                                sx={{ display: { xs: "none", md: "block" } }}>{label}</StepButton>
                         </Step>
                     ))}
                 </Stepper>
-                
-                <Typography sx={{ fontSize:{md: "1.8rem", xs: "1.2rem"}, fontWeight: 600, fontFamily: "Lato", marginBottom: 5 }}>
+
+                <Typography sx={{ fontSize: { md: "1.8rem", xs: "1.2rem" }, fontWeight: 600, fontFamily: "Lato", marginBottom: 5 }}>
                     Signaler une Arnaque
                 </Typography>
 
@@ -205,12 +205,12 @@ function FormSignal() {
                 <Box sx={{
                     display: "flex",
                     justifyContent: "space-between",
-                    width:{xs: "100%", md: 500},
+                    width: { xs: "100%", md: 500 },
                     marginTop: 6
                 }}>
-                    <Button 
-                        disabled= {activeStep === 0}
-                        onClick={() => setActiveStep(prev => prev -1)}
+                    <Button
+                        disabled={activeStep === 0}
+                        onClick={() => setActiveStep(prev => prev - 1)}
                         style={{
                             padding: "10px 20px",
                             borderRadius: "6px",
@@ -219,7 +219,7 @@ function FormSignal() {
                             color: activeStep > 0 ? "2e7d32" : "gray",
                             cursor: activeStep === 0 ? "not-allowed" : "pointer",
                         }}
-                        sx={{fontSize: {xs: "0.8rem", md: "1rem"}}}
+                        sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }}
                     >
                         Precedent
                     </Button>
@@ -234,22 +234,22 @@ function FormSignal() {
                                 color: "white",
                                 border: "none",
                                 cursor: "pointer",
-                                fontSize: {xs: "0.8rem", md: "1rem"}
+                                fontSize: { xs: "0.8rem", md: "1rem" }
                             }}
-                            sx={{fontSize: {xs: "0.8rem", md: "1rem"}}}
+                            sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }}
                         >
                             Suivant
                         </Button>
                     ) : (
                         <Button onClick={handleSUbmit}
-                        style={{
-                            padding: "10px 20px",
-                            borderRadius: "6px",
-                            background: "2e7d32",
-                            color: "white",
-                            border: "none",
-                            cursor: "pointer",
-                        }}
+                            style={{
+                                padding: "10px 20px",
+                                borderRadius: "6px",
+                                background: "2e7d32",
+                                color: "white",
+                                border: "none",
+                                cursor: "pointer",
+                            }}
                         >
                             Envoyer
                         </Button>

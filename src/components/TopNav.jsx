@@ -14,16 +14,21 @@ import MenuIcon from "@mui/icons-material/Menu";
 import LoginIcon from "@mui/icons-material/Login";
 import "../styles/Welcom.css";
 import Logo from "./Logo";
-import { useNavigate } from "react-router-dom";
-import useAuth from "../services/useAuth";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { Dropdown, MenuButton, Menu as JoyMenu, MenuItem as JoyMenuItem } from "@mui/joy";
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import PersonIcon from '@mui/icons-material/Person';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { Dropdown, MenuButton, Menu as JoyMenu, MenuItem as JoyMenuItem, Badge } from "@mui/joy";
 
 const pages = ["Accueil", "contacts", "signaler"];
 
 function TopNav() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
 
   const handleOpenNavMenu = (event) => {
@@ -39,9 +44,9 @@ function TopNav() {
   };
 
   const routes = {
-    Accueil : "/",
-    contacts : "/contacts",
-    signaler : "/signaler"
+    Accueil: "/",
+    contacts: "/contacts",
+    signaler: "/signaler"
   };
 
   return (
@@ -88,8 +93,17 @@ function TopNav() {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={() => navigate(routes[page])}>
-                  <Typography sx={{ textAlign: "center", fontFamily: "Lato" }}>
+                <MenuItem
+                  key={page}
+                  onClick={() => navigate(routes[page])}
+                  selected={location.pathname === routes[page]}
+                >
+                  <Typography sx={{
+                    textAlign: "center",
+                    fontFamily: "Lato",
+                    color: location.pathname === routes[page] ? "#1F9EF9" : "inherit",
+                    fontWeight: location.pathname === routes[page] ? "bold" : "normal"
+                  }}>
                     {page}
                   </Typography>
                 </MenuItem>
@@ -131,7 +145,14 @@ function TopNav() {
               <Button
                 key={page}
                 onClick={() => navigate(routes[page])}
-                sx={{ my: 2, color: "black", display: "block" }}
+                sx={{
+                  my: 2,
+                  color: location.pathname === routes[page] ? "#1F9EF9" : "black",
+                  display: "block",
+                  fontWeight: location.pathname === routes[page] ? "bold" : "normal",
+                  borderBottom: location.pathname === routes[page] ? "2px solid #1F9EF9" : "none",
+                  borderRadius: 0
+                }}
               >
                 {page}
               </Button>
@@ -139,34 +160,96 @@ function TopNav() {
           </Box>
 
           {user ? (
-            <Dropdown>
-              <MenuButton
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              {/* Notification Icon */}
+              <IconButton
                 variant="plain"
-                sx={{ p: 0, minWidth: 0}}
+                sx={{
+                  display: { xs: "none", md: "flex" },
+                  "&:hover": { backgroundColor: "rgba(31, 158, 249, 0.1)" }
+                }}
               >
-                <AccountCircleIcon sx={{ color: "gray", fontSize: "2rem", display: { xs: "none", md: "flex"} }}>
-                  {user.pseudo ? user.pseudo[0].toUpperCase() : "U"}
-                </AccountCircleIcon>
-              </MenuButton>
+                <Badge badgeContent={3} color="danger" size="sm" >
+                  <NotificationsIcon sx={{ color: "#1F9EF9", fontSize: "1.8rem" }} />
+                </Badge>
+              </IconButton>
 
-              <JoyMenu>
-                <JoyMenuItem>{user.pseudo || "Profil"}</JoyMenuItem>
-                <JoyMenuItem>Mon compte</JoyMenuItem>
-                <JoyMenuItem onClick={logout}>Deconnexion</JoyMenuItem>
-              </JoyMenu>
-            </Dropdown>
+              {/* User Menu */}
+              <Dropdown>
+                <MenuButton
+                  variant="plain"
+                  sx={{
+                    p: 0,
+                    minWidth: 0,
+                    borderRadius: "50%",
+                    "&:hover": { backgroundColor: "rgba(31, 158, 249, 0.1)" }
+                  }}
+                >
+                  <AccountCircleIcon sx={{ color: "#1F9EF9", fontSize: "2rem", display: { xs: "none", md: "flex" } }}>
+                    {user.pseudo ? user.pseudo[0].toUpperCase() : "U"}
+                  </AccountCircleIcon>
+                </MenuButton>
+
+                <JoyMenu
+                  sx={{
+                    minWidth: 200,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                    borderRadius: 3,
+                    p: 4,
+                  }}
+                >
+                  <JoyMenuItem
+                    sx={{
+                      borderRadius: 2,
+                      mb: 0.5,
+                      fontFamily: "Lato",
+                      fontWeight: 600,
+                      pointerEvents: "none",
+                      backgroundColor: "rgba(31, 158, 249, 0.1)",
+                      color: "#1F9EF9"
+                    }}
+                  >
+                    <PersonIcon sx={{ mr: 1, fontSize: "1.2rem" }} />
+                    {user.pseudo || "Utilisateur"}
+                  </JoyMenuItem>
+                  <JoyMenuItem
+                    sx={{
+                      borderRadius: 2,
+                      mb: 0.5,
+                      fontFamily: "Lato",
+                      "&:hover": { backgroundColor: "rgba(31, 158, 249, 0.1)" }
+                    }}
+                  >
+                    <SettingsIcon sx={{ mr: 1, fontSize: "1.2rem" }} />
+                    Mon compte
+                  </JoyMenuItem>
+                  <JoyMenuItem
+                    onClick={logout}
+                    sx={{
+                      borderRadius: 2,
+                      fontFamily: "Lato",
+                      color: "#e74c3c",
+                      "&:hover": { backgroundColor: "rgba(231, 76, 60, 0.1)" }
+                    }}
+                  >
+                    <LogoutIcon sx={{ mr: 1, fontSize: "1.2rem" }} />
+                    Déconnexion
+                  </JoyMenuItem>
+                </JoyMenu>
+              </Dropdown>
+            </Box>
           ) : (
             <Button
-            sx={{
-              display: { xs: "none", md: "flex", backgroundColor: "#1F9EF9" },
-            }}
-            variant="contained"
-            startIcon={<LoginIcon />}
-            onClick={goToLogin}
-          >
-            {" "}
-            Connexion{" "}
-          </Button>
+              sx={{
+                display: { xs: "none", md: "flex", backgroundColor: "#1F9EF9" },
+              }}
+              variant="contained"
+              startIcon={<LoginIcon />}
+              onClick={goToLogin}
+            >
+              {" "}
+              Connexion{" "}
+            </Button>
           )}
         </Toolbar>
       </Container>

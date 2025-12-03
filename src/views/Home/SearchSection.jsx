@@ -1,5 +1,5 @@
 import { Input } from "@mui/joy";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, Container, Paper } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
 function SearchSection() {
@@ -9,76 +9,79 @@ function SearchSection() {
         width: "100%",
         display: "flex",
         flexDirection: "column",
+        alignItems: "center",
+        py: 8,
+        background: "linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)"
       }}
     >
-      <Box
-        sx={{
-          display: { xs: "none", md: "flex" },
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: "column",
-          height: "30vh",
-        }}
-      >
-        <Typography variant="h4" fontWeight={500}>
-          Recherchez un signalement
-        </Typography>
-        <p color="#5F5F5F">
-          Entrez le nom d'une personne, d'une entreprise ou un numéro de
-          téléphone pour vérifier si un signalement existe déjà.
-        </p>
-
+      <Container maxWidth="md">
         <Box
-          display={"flex"}
-          flexDirection={"row"}
-          sx={{ width: "80%", justifyContent: "center" }}
-          padding={5}
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column",
+            textAlign: "center",
+            mb: 6
+          }}
         >
-          <Input startDecorator={<SearchIcon />} sx={{ width: "40%" }} />
+          <Typography variant="h4" fontWeight={800} gutterBottom sx={{ fontFamily: 'Lato, sans-serif', color: '#1A1A1A' }}>
+            Recherchez un signalement
+          </Typography>
+          <Typography variant="body1" sx={{ color: "#5F5F5F", maxWidth: "600px", fontFamily: 'Lato, sans-serif', fontSize: '1.1rem' }}>
+            Entrez le nom d'une personne, d'une entreprise ou un numéro de
+            téléphone pour vérifier si un signalement existe déjà dans notre base de données sécurisée.
+          </Typography>
+        </Box>
+
+        <Paper
+          elevation={3}
+          sx={{
+            p: 1,
+            display: 'flex',
+            alignItems: 'center',
+            borderRadius: '50px',
+            width: '100%',
+            maxWidth: '700px',
+            mx: 'auto',
+            border: '1px solid rgba(0,0,0,0.05)',
+            boxShadow: '0 10px 40px -10px rgba(0,0,0,0.1)'
+          }}
+        >
+          <Input
+            startDecorator={<SearchIcon sx={{ color: '#1F9EF9' }} />}
+            placeholder="Rechercher (ex: 06 12 34 56 78, Entreprise X...)"
+            variant="plain"
+            sx={{
+              flex: 1,
+              ml: 1,
+              '--Input-focusedHighlight': 'transparent',
+              backgroundColor: 'transparent',
+              fontSize: '1rem',
+              py: 1.5
+            }}
+          />
           <Button
             variant="contained"
-            sx={{ textTransform: "none", marginLeft: 2 }}
+            sx={{
+              textTransform: "none",
+              borderRadius: '30px',
+              px: 4,
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              background: "linear-gradient(45deg, #1F9EF9 30%, #21CBF3 90%)",
+              boxShadow: '0 4px 14px 0 rgba(31, 158, 249, 0.4)',
+              '&:hover': {
+                background: "linear-gradient(45deg, #008ae6 30%, #00b4d8 90%)",
+                boxShadow: '0 6px 20px 0 rgba(31, 158, 249, 0.6)'
+              }
+            }}
           >
-            {" "}
-            Rechercher{" "}
+            Rechercher
           </Button>
-        </Box>
-      </Box>
-
-      <Box
-        sx={{
-          display: { xs: "flex", md: "none" },
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: "column",
-          paddingX:5,
-          paddingY: 5
-        }}
-      >
-        <Typography variant="h6" fontWeight={500}>
-          Recherchez un signalement
-        </Typography>
-        <p color="#5F5F5F" style={{ fontSize: 14}}>
-          Entrez le nom d'une personne, d'une entreprise ou un numéro de
-          téléphone pour vérifier si un signalement existe déjà.
-        </p>
-
-        <Box
-          display={"flex"}
-          flexDirection={"row"}
-          sx={{ width: "100%", justifyContent: "center"}}
-          padding={2}
-        >
-          <Input startDecorator={<SearchIcon />} sx={{ width: "80%" }} />
-          <Button
-            variant="contained"
-            sx={{ textTransform: "none", marginLeft: 2 }}
-          >
-            {" "}
-            Rechercher{" "}
-          </Button>
-        </Box>
-      </Box>
+        </Paper>
+      </Container>
     </Box>
   );
 }
