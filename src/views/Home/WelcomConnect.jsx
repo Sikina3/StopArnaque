@@ -17,12 +17,12 @@ function WelcomConnect() {
     ];
 
     return (
-        <Box sx={{ width: "100%", minHeight: "100vh", bgcolor: "#f8f9fa", paddingBottom: 8 }}>
+        <Box sx={{ width: "100%", minHeight: "90vh", bgcolor: "#f8f9fa", paddingBottom: 8 }}>
             {/* Hero Section */}
             <Box sx={{
                 background: "linear-gradient(135deg, #1F9EF9 0%, #0056b3 100%)",
                 color: "white",
-                py: 15,
+                py: 12,
                 px: 2,
                 textAlign: "center",
                 borderBottomLeftRadius: "50% 20%",
@@ -46,7 +46,7 @@ function WelcomConnect() {
 
             <Container maxWidth="lg">
                 {/* Stats Grid */}
-                <Grid container spacing={4} sx={{ mb: 8, justifyContent: {md: "center"} }}>
+                <Grid container spacing={4} sx={{ mb: 8, justifyContent: { md: "center" } }}>
                     {stats.map((stat, index) => (
                         <Grid item xs={12} md={4} key={index}>
                             <Card sx={{
@@ -66,10 +66,10 @@ function WelcomConnect() {
                                     {stat.icon}
                                 </Box>
                                 <Box>
-                                    <Typography variant="h4" fontWeight="bold" color="text.primary" sx={{fontSize: {xs: "1.4rem", md: "1.8rem"}}}>
+                                    <Typography variant="h4" fontWeight="bold" color="text.primary" sx={{ fontSize: { xs: "1.4rem", md: "1.8rem" } }}>
                                         {stat.value}
                                     </Typography>
-                                    <Typography variant="body1" color="text.secondary" fontWeight="medium" sx={{fontSize: {xs: "1rem", md: "1.4rem"}}}>
+                                    <Typography variant="body1" color="text.secondary" fontWeight="medium" sx={{ fontSize: { xs: "1rem", md: "1.4rem" } }}>
                                         {stat.label}
                                     </Typography>
                                 </Box>
@@ -80,7 +80,7 @@ function WelcomConnect() {
 
                 {/* Actions Section */}
                 <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ mb: 4, fontFamily: 'Lato, sans-serif', fontSize: {xs: "1.4rem", md: "1.6rem"} }}>
+                    <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ mb: 4, fontFamily: 'Lato, sans-serif', fontSize: { xs: "1.4rem", md: "1.6rem" } }}>
                         Que souhaitez-vous faire aujourd'hui ?
                     </Typography>
                     <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} justifyContent="center">

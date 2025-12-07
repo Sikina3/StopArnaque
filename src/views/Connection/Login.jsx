@@ -22,7 +22,7 @@ function Login() {
 
     if (window.innerWidth < 900) {
       tl.to(".panel", {
-        y: "160%",
+        y: "150%",
         duration: 0.8,
         ease: "power3.inOut",
       }).call(() => setModeLogin(false), null, "-=0.5");
@@ -86,7 +86,7 @@ function Login() {
             position: "absolute",
             display: "flex",
             left: { md: "-50%", xs: "0" },
-            top: { md: "0", xs: "-80%" },
+            top: { md: "0", xs: "-75%" },
             zIndex: 10,
             flexDirection: { md: "row", xs: "column" },
             boxShadow: "0 10px 40px rgba(31, 158, 249, 0.3)",

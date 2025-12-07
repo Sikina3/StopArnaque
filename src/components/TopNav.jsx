@@ -61,7 +61,7 @@ function TopNav() {
         elevation={0}
         sx={{
           backgroundColor: "white",
-          borderRadius: { xs: 2, md: 3 },
+          borderRadius: { xs: 10, md: 10 },
           boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
         }}
       >

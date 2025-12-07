@@ -20,7 +20,7 @@ function Welcom() {
       sx={{
         width: "100%",
         // marginTop: "64px",
-        minHeight: "100vh",
+        minHeight: "90vh",
         display: "flex",
         alignItems: "center",
         background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
