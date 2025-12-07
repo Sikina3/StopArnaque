@@ -19,13 +19,14 @@ function Welcom() {
     <Box
       sx={{
         width: "100%",
-        marginTop: "64px",
-        minHeight: "85vh",
+        // marginTop: "64px",
+        minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
         position: "relative",
-        overflow: "hidden"
+        overflow: "hidden",
+        py: { md: 0, xs: 10 }
       }}
     >
       {/* Decorative background elements */}

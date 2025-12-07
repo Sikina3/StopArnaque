@@ -166,8 +166,8 @@ function FormSignal() {
             <TopNav />
 
             <Box sx={{
-                marginTop: 14,
-                height: "100vh",
+                pt: { xs: "80px", md: "100px" },
+                minHeight: "100vh",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",

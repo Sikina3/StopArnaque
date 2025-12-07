@@ -91,14 +91,14 @@ function Signalements() {
     return (
         <>
             <TopNav />
-            <Box sx={{ width: "100%", marginTop: "64px", minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
+            <Box sx={{ width: "100%", pt: { xs: "70px", md: "90px" }, minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
                 <Container maxWidth="lg" sx={{ py: 6 }}>
                     {/* Header */}
                     <Box sx={{ mb: 6 }}>
                         <Typography
                             variant="h3"
                             fontWeight={800}
-                            sx={{ fontFamily: "Lato", color: "#1A1A1A", mb: 1, fontSize: {xs: "1.8rem", md: "2.4rem"} }}
+                            sx={{ fontFamily: "Lato", color: "#1A1A1A", mb: 1, fontSize: { xs: "1.8rem", md: "2.4rem" } }}
                         >
                             Liste des signalements
                         </Typography>

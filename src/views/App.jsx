@@ -37,7 +37,7 @@ function App() {
           element={
             <>
               <TopNav />
-              <Box>
+              <Box sx={{ pt: { xs: "70px", md: "90px" } }}>
                 {user ? <WelcomConnect /> : <Welcom />}
                 <SearchSection />
                 <HowItWorks />
