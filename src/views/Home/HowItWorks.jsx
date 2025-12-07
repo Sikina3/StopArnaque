@@ -30,10 +30,10 @@ function HowItWorks() {
         <Box sx={{ backgroundColor: "#fff", width: "100%", py: 10 }}>
             <Container maxWidth="lg">
                 <Box sx={{ textAlign: "center", mb: 8 }}>
-                    <Typography variant="h4" fontWeight={800} fontFamily={"Lato"} gutterBottom>
+                    <Typography variant="h4" fontWeight={800} fontFamily={"Lato"} gutterBottom sx={{ fontSize: {md: "2rem", xs: "1.6rem"} }}>
                         Comment ça marche ?
                     </Typography>
-                    <Typography variant="h6" color="text.secondary" fontFamily={"Lato"}>
+                    <Typography variant="h6" color="text.secondary" fontFamily={"Lato"} sx={{ fontSize: {md: "1.4rem", xs: "1rem"} }}>
                         Un processus simple et transparent en 3 étapes
                     </Typography>
                 </Box>

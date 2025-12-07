@@ -148,7 +148,7 @@ function Welcom() {
             <Button
               variant="contained"
               size="large"
-              onClick={() => navigate("/signaler")}
+              onClick={() => navigate("/login")}
               sx={{
                 textTransform: "none",
                 px: 5,

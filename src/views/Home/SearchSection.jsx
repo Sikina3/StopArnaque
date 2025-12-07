@@ -25,10 +25,10 @@ function SearchSection() {
             mb: 6
           }}
         >
-          <Typography variant="h4" fontWeight={800} gutterBottom sx={{ fontFamily: 'Lato, sans-serif', color: '#1A1A1A' }}>
+          <Typography variant="h4" fontWeight={800} gutterBottom sx={{ fontFamily: 'Lato, sans-serif', color: '#1A1A1A', fontSize: {xs: "1.6rem", md: "2rem"} }}>
             Recherchez un signalement
           </Typography>
-          <Typography variant="body1" sx={{ color: "#5F5F5F", maxWidth: "600px", fontFamily: 'Lato, sans-serif', fontSize: '1.1rem' }}>
+          <Typography variant="body1" sx={{ color: "#5F5F5F", maxWidth: "600px", fontFamily: 'Lato, sans-serif', fontSize: {md: '1.1rem', xs: "0.9rem"} }}>
             Entrez le nom d'une personne, d'une entreprise ou un numéro de
             téléphone pour vérifier si un signalement existe déjà dans notre base de données sécurisée.
           </Typography>

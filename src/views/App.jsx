@@ -13,6 +13,17 @@ import Signalements from "./Signalements/Signalements";
 import SignalementDetails from "./Signalements/SignalementDetails";
 import { useAuth } from "../context/AuthContext";
 
+import ChatWidget from "../components/ChatWidget";
+
+// Admin imports
+import AdminLogin from "./Admin/AdminLogin";
+import AdminLayout from "./Admin/AdminLayout";
+import Dashboard from "./Admin/Dashboard";
+import AdminSignalements from "./Admin/AdminSignalements";
+import AdminUsers from "./Admin/AdminUsers";
+import AdminAnalytics from "./Admin/AdminAnalytics";
+import AdminSettings from "./Admin/AdminSettings";
+
 function App() {
   const { user } = useAuth();
 
@@ -40,7 +51,19 @@ function App() {
         <Route path="/signaler" element={<FormSignal />} />
         <Route path="/signalements" element={<Signalements />} />
         <Route path="/signalements/:id" element={<SignalementDetails />} />
+
+        {/* Admin Routes - SÉCURITÉ DÉSACTIVÉE TEMPORAIREMENT */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="signalements" element={<AdminSignalements />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
       </Routes>
+      {user && <ChatWidget />}
     </BrowserRouter>
   );
 }

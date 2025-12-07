@@ -22,8 +22,9 @@ import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Dropdown, MenuButton, Menu as JoyMenu, MenuItem as JoyMenuItem, Badge } from "@mui/joy";
+import NotificationMenu from "./NotificationMenu";
 
-const pages = ["Accueil", "contacts", "signaler"];
+const pages = ["Accueil", "signaler"];
 
 function TopNav() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -45,7 +46,6 @@ function TopNav() {
 
   const routes = {
     Accueil: "/",
-    contacts: "/contacts",
     signaler: "/signaler"
   };
 
@@ -122,18 +122,6 @@ function TopNav() {
             <Logo />
           </Box>
 
-          <Box sx={{ display: { xs: "flex", md: "none" } }}>
-            {user ? (
-              <AccountCircleIcon sx={{ color: "gray", fontSize: "1.8rem" }}>
-                {user.pseudo ? user.pseudo[0].toUpperCase() : "U"}
-              </AccountCircleIcon>
-            ) : (
-              <IconButton aria-label="Login" onClick={goToLogin}>
-                <LoginIcon sx={{ color: "#1F9EF9" }} />
-              </IconButton>
-            )}
-          </Box>
-
           <Box
             sx={{
               flexGrow: 1,
@@ -162,17 +150,7 @@ function TopNav() {
           {user ? (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               {/* Notification Icon */}
-              <IconButton
-                variant="plain"
-                sx={{
-                  display: { xs: "none", md: "flex" },
-                  "&:hover": { backgroundColor: "rgba(31, 158, 249, 0.1)" }
-                }}
-              >
-                <Badge badgeContent={3} color="danger" size="sm" >
-                  <NotificationsIcon sx={{ color: "#1F9EF9", fontSize: "1.8rem" }} />
-                </Badge>
-              </IconButton>
+              <NotificationMenu />
 
               {/* User Menu */}
               <Dropdown>
@@ -185,7 +163,7 @@ function TopNav() {
                     "&:hover": { backgroundColor: "rgba(31, 158, 249, 0.1)" }
                   }}
                 >
-                  <AccountCircleIcon sx={{ color: "#1F9EF9", fontSize: "2rem", display: { xs: "none", md: "flex" } }}>
+                  <AccountCircleIcon sx={{ color: "#1F9EF9", fontSize: "2rem", display: "flex"}}>
                     {user.pseudo ? user.pseudo[0].toUpperCase() : "U"}
                   </AccountCircleIcon>
                 </MenuButton>

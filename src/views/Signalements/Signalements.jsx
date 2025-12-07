@@ -98,7 +98,7 @@ function Signalements() {
                         <Typography
                             variant="h3"
                             fontWeight={800}
-                            sx={{ fontFamily: "Lato", color: "#1A1A1A", mb: 1 }}
+                            sx={{ fontFamily: "Lato", color: "#1A1A1A", mb: 1, fontSize: {xs: "1.8rem", md: "2.4rem"} }}
                         >
                             Liste des signalements
                         </Typography>

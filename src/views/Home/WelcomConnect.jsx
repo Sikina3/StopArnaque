@@ -31,10 +31,14 @@ function WelcomConnect() {
                 boxShadow: 3
             }}>
                 <Container maxWidth="md">
-                    <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom sx={{ fontFamily: 'Lato, sans-serif' }}>
+                    <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom
+                        sx={{
+                            fontFamily: 'Lato, sans-serif',
+                            fontSize: { xs: '1.75rem', md: '3rem' }
+                        }}>
                         Bonjour, {user.pseudo} !
                     </Typography>
-                    <Typography variant="h6" sx={{ opacity: 0.9, fontFamily: 'Lato, sans-serif' }}>
+                    <Typography variant="h6" sx={{ opacity: 0.9, fontFamily: 'Lato, sans-serif', fontSize: { xs: '1.2rem', md: '1.7rem' } }}>
                         Heureux de vous revoir. Ensemble, rendons internet plus sûr.
                     </Typography>
                 </Container>
@@ -42,7 +46,7 @@ function WelcomConnect() {
 
             <Container maxWidth="lg">
                 {/* Stats Grid */}
-                <Grid container spacing={4} sx={{ mb: 8 }}>
+                <Grid container spacing={4} sx={{ mb: 8, justifyContent: {md: "center"} }}>
                     {stats.map((stat, index) => (
                         <Grid item xs={12} md={4} key={index}>
                             <Card sx={{
@@ -62,10 +66,10 @@ function WelcomConnect() {
                                     {stat.icon}
                                 </Box>
                                 <Box>
-                                    <Typography variant="h4" fontWeight="bold" color="text.primary">
+                                    <Typography variant="h4" fontWeight="bold" color="text.primary" sx={{fontSize: {xs: "1.4rem", md: "1.8rem"}}}>
                                         {stat.value}
                                     </Typography>
-                                    <Typography variant="body1" color="text.secondary" fontWeight="medium">
+                                    <Typography variant="body1" color="text.secondary" fontWeight="medium" sx={{fontSize: {xs: "1rem", md: "1.4rem"}}}>
                                         {stat.label}
                                     </Typography>
                                 </Box>
@@ -76,7 +80,7 @@ function WelcomConnect() {
 
                 {/* Actions Section */}
                 <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ mb: 4, fontFamily: 'Lato, sans-serif' }}>
+                    <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ mb: 4, fontFamily: 'Lato, sans-serif', fontSize: {xs: "1.4rem", md: "1.6rem"} }}>
                         Que souhaitez-vous faire aujourd'hui ?
                     </Typography>
                     <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} justifyContent="center">

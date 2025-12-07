@@ -25,7 +25,7 @@ function LastSignalement() {
             variant="h4"
             fontWeight={800}
             gutterBottom
-            sx={{ fontFamily: "Lato", color: "#1A1A1A" }}
+            sx={{ fontFamily: "Lato", color: "#1A1A1A", fontSize: {xs: "1.6rem", md: "2rem"} }}
           >
             Derniers signalements validés
           </Typography>
