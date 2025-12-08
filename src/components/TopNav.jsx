@@ -54,7 +54,9 @@ function TopNav() {
       px: { xs: 1.5, md: 4 },
       py: { xs: 1, md: 2 },
       zIndex: 1100,
-      backgroundColor: "transparent"
+      backgroundColor: "rgb(255, 255, 255, 0.3)",
+      backdropFilter: "blur(10px)",
+      webkitBackdropFilter: "blur(10px)",
     }}>
       <AppBar
         position="static"

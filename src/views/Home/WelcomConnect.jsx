@@ -17,7 +17,7 @@ function WelcomConnect() {
     ];
 
     return (
-        <Box sx={{ width: "100%", minHeight: "90vh", bgcolor: "#f8f9fa", paddingBottom: 8 }}>
+        <Box sx={{ width: "100%", minHeight: "90vh", bgcolor: "#f8f9fa", paddingBottom: 8, marginTop: 1 }}>
             {/* Hero Section */}
             <Box sx={{
                 background: "linear-gradient(135deg, #1F9EF9 0%, #0056b3 100%)",
