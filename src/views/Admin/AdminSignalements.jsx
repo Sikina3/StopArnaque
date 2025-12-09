@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Box,
     Card,
@@ -24,6 +24,7 @@ import {
     DialogActions,
     Tabs,
     Tab,
+    CircularProgress
 } from '@mui/material';
 import {
     Search as SearchIcon,
@@ -33,83 +34,34 @@ import {
     Visibility as VisibilityIcon,
     FilterList as FilterListIcon,
 } from '@mui/icons-material';
+import api from '../../services/api';
 
 function AdminSignalements() {
     const [tabValue, setTabValue] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
     const [anchorEl, setAnchorEl] = useState(null);
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [signalements, setSignalements] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedSignalement, setSelectedSignalement] = useState(null);
 
-    // Données de démonstration
-    const signalements = [
-        {
-            id: 1,
-            title: 'Arnaque WhatsApp - Faux support technique',
-            user: 'Jean Dupont',
-            email: 'jean.dupont@email.com',
-            category: 'Phishing',
-            status: 'En attente',
-            date: '2025-12-07',
-            priority: 'Haute',
-            description: 'Un numéro inconnu prétend être du support technique Microsoft...',
-        },
-        {
-            id: 2,
-            title: 'Faux site bancaire BNP',
-            user: 'Marie Martin',
-            email: 'marie.martin@email.com',
-            category: 'Faux site',
-            status: 'Validé',
-            date: '2025-12-06',
-            priority: 'Critique',
-            description: 'Site web frauduleux imitant le site officiel de la BNP...',
-        },
-        {
-            id: 3,
-            title: 'Email phishing Amazon',
-            user: 'Pierre Durant',
-            email: 'pierre.durant@email.com',
-            category: 'Phishing',
-            status: 'En cours',
-            date: '2025-12-06',
-            priority: 'Moyenne',
-            description: 'Email frauduleux demandant de mettre à jour les informations de paiement...',
-        },
-        {
-            id: 4,
-            title: 'Appel frauduleux - Impôts',
-            user: 'Sophie Bernard',
-            email: 'sophie.bernard@email.com',
-            category: 'Appel téléphonique',
-            status: 'Validé',
-            date: '2025-12-05',
-            priority: 'Haute',
-            description: 'Appel téléphonique prétendant provenir des impôts...',
-        },
-        {
-            id: 5,
-            title: 'SMS suspect - Livraison Colissimo',
-            user: 'Luc Petit',
-            email: 'luc.petit@email.com',
-            category: 'SMS',
-            status: 'En attente',
-            date: '2025-12-05',
-            priority: 'Basse',
-            description: 'SMS frauduleux concernant une prétendue livraison...',
-        },
-        {
-            id: 6,
-            title: 'Fausse offre d\'emploi Indeed',
-            user: 'Emma Rousseau',
-            email: 'emma.rousseau@email.com',
-            category: 'Arnaque emploi',
-            status: 'Rejeté',
-            date: '2025-12-04',
-            priority: 'Moyenne',
-            description: 'Offre d\'emploi frauduleuse demandant des frais d\'inscription...',
-        },
-    ];
+    useEffect(() => {
+        fetchSignalements();
+    }, []);
+
+    const fetchSignalements = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get('/signalements');
+            if (Array.isArray(response.data)) {
+                setSignalements(response.data);
+            }
+        } catch (error) {
+            console.error("Erreur lors du chargement des signalements:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
@@ -129,47 +81,69 @@ function AdminSignalements() {
         handleMenuClose();
     };
 
+    const updateStatus = async (newStatus) => {
+        if (!selectedSignalement) return;
+
+        try {
+            // Appel API pour mettre à jour le statut
+            await api.put(`/signalements/${selectedSignalement.id}`, {
+                status: newStatus
+            });
+
+            // Mettre à jour l'état local
+            setSignalements(prevSignalements =>
+                prevSignalements.map(sig =>
+                    sig.id === selectedSignalement.id
+                        ? { ...sig, status: newStatus }
+                        : sig
+                )
+            );
+
+            // Fermer le menu/dialogue
+            handleMenuClose();
+            setDialogOpen(false);
+        } catch (error) {
+            console.error("Erreur lors de la mise à jour du statut:", error);
+            alert("Erreur lors de la mise à jour du statut");
+        }
+    };
+
     const handleApprove = () => {
-        console.log('Approuver:', selectedSignalement);
-        handleMenuClose();
+        updateStatus('Validé');
     };
 
     const handleReject = () => {
-        console.log('Rejeter:', selectedSignalement);
-        handleMenuClose();
+        updateStatus('Rejeté');
     };
 
     const getStatusColor = (status) => {
-        switch (status) {
-            case 'Validé': return 'success';
-            case 'En attente': return 'warning';
-            case 'En cours': return 'info';
-            case 'Rejeté': return 'error';
+        switch (status?.toLowerCase()) {
+            case 'validé': return 'success';
+            case 'en attente': return 'warning';
+            case 'en cours': return 'info';
+            case 'rejeté': return 'error';
             default: return 'default';
         }
     };
 
-    const getPriorityColor = (priority) => {
-        switch (priority) {
-            case 'Critique': return '#ef4444';
-            case 'Haute': return '#f59e0b';
-            case 'Moyenne': return '#3b82f6';
-            case 'Basse': return '#6b7280';
-            default: return '#6b7280';
-        }
-    };
-
     const filteredSignalements = signalements.filter(sig => {
-        const matchesSearch = sig.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            sig.user.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch =
+            (sig.titre?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (sig.utilisateur?.name?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+
         const matchesTab =
             (tabValue === 0) || // Tous
-            (tabValue === 1 && sig.status === 'En attente') ||
+            (tabValue === 1 && sig.status === 'En Attente') ||
             (tabValue === 2 && sig.status === 'Validé') ||
             (tabValue === 3 && sig.status === 'Rejeté');
 
         return matchesSearch && matchesTab;
     });
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '-';
+        return new Date(dateString).toLocaleDateString('fr-FR');
+    };
 
     return (
         <Box>
@@ -235,64 +209,75 @@ function AdminSignalements() {
                                     <TableCell sx={{ fontWeight: 700 }}>Titre</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }}>Utilisateur</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }}>Catégorie</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Priorité</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }}>Statut</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }}>Date</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }}>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {filteredSignalements.map((row) => (
-                                    <TableRow
-                                        key={row.id}
-                                        sx={{
-                                            '&:hover': { bgcolor: '#f9fafb' },
-                                            transition: 'background-color 0.2s'
-                                        }}
-                                    >
-                                        <TableCell sx={{ fontWeight: 600 }}>#{row.id}</TableCell>
-                                        <TableCell sx={{ maxWidth: 300 }}>
-                                            <Typography variant="body2" fontWeight={600} noWrap>
-                                                {row.title}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>{row.user}</TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={row.category}
-                                                size="small"
-                                                sx={{ bgcolor: 'rgba(31, 158, 249, 0.1)', color: '#1F9EF9' }}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={row.priority}
-                                                size="small"
-                                                sx={{
-                                                    bgcolor: `${getPriorityColor(row.priority)}15`,
-                                                    color: getPriorityColor(row.priority),
-                                                    fontWeight: 600,
-                                                }}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={row.status}
-                                                size="small"
-                                                color={getStatusColor(row.status)}
-                                            />
-                                        </TableCell>
-                                        <TableCell>{row.date}</TableCell>
-                                        <TableCell>
-                                            <IconButton
-                                                size="small"
-                                                onClick={(e) => handleMenuOpen(e, row)}
-                                            >
-                                                <MoreVertIcon fontSize="small" />
-                                            </IconButton>
+                                {loading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                                            <CircularProgress size={30} />
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                ) : filteredSignalements.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                                            Aucun signalement trouvé
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    filteredSignalements.map((row) => (
+                                        <TableRow
+                                            key={row.id}
+                                            sx={{
+                                                '&:hover': { bgcolor: '#f9fafb' },
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                        >
+                                            <TableCell sx={{ fontWeight: 600 }}>#{row.id}</TableCell>
+                                            <TableCell sx={{ maxWidth: 300 }}>
+                                                <Typography variant="body2" fontWeight={600} noWrap>
+                                                    {row.titre}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box>
+                                                    <Typography variant="body2">
+                                                        {row.utilisateur?.name || 'Anonyme'}
+                                                    </Typography>
+                                                    <Typography variant="caption" color="textSecondary">
+                                                        {row.utilisateur?.email || ''}
+                                                    </Typography>
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Chip
+                                                    label={row.type}
+                                                    size="small"
+                                                    sx={{ bgcolor: 'rgba(31, 158, 249, 0.1)', color: '#1F9EF9' }}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <Chip
+                                                    label={row.status}
+                                                    size="small"
+                                                    color={getStatusColor(row.status)}
+                                                />
+                                            </TableCell>
+                                            <TableCell>{formatDate(row.created_at)}</TableCell>
+                                            <TableCell>
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={(e) => handleMenuOpen(e, row)}
+                                                >
+                                                    <MoreVertIcon fontSize="small" />
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
                             </TableBody>
                         </Table>
                     </TableContainer>
@@ -333,12 +318,11 @@ function AdminSignalements() {
                     {selectedSignalement && (
                         <Box>
                             <Typography variant="h6" gutterBottom fontWeight={600}>
-                                {selectedSignalement.title}
+                                {selectedSignalement.titre}
                             </Typography>
 
                             <Box sx={{ my: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                                <Chip label={selectedSignalement.category} size="small" color="primary" />
-                                <Chip label={selectedSignalement.priority} size="small" />
+                                <Chip label={selectedSignalement.type} size="small" color="primary" />
                                 <Chip label={selectedSignalement.status} size="small" color={getStatusColor(selectedSignalement.status)} />
                             </Box>
 
@@ -347,10 +331,10 @@ function AdminSignalements() {
                                     Soumis par
                                 </Typography>
                                 <Typography variant="body1" fontWeight={500}>
-                                    {selectedSignalement.user}
+                                    {selectedSignalement.utilisateur?.name || 'Anonyme'}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {selectedSignalement.email}
+                                    {selectedSignalement.utilisateur?.email || ''}
                                 </Typography>
                             </Box>
 
@@ -368,7 +352,7 @@ function AdminSignalements() {
                                     Date de soumission
                                 </Typography>
                                 <Typography variant="body1">
-                                    {selectedSignalement.date}
+                                    {formatDate(selectedSignalement.created_at)}
                                 </Typography>
                             </Box>
                         </Box>

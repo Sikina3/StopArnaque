@@ -39,15 +39,6 @@ function Dashboard() {
             bgColor: 'rgba(31, 158, 249, 0.1)',
         },
         {
-            title: 'Utilisateurs Actifs',
-            value: '856',
-            change: '+8%',
-            trend: 'up',
-            icon: <PeopleIcon sx={{ fontSize: 40 }} />,
-            color: '#10b981',
-            bgColor: 'rgba(16, 185, 129, 0.1)',
-        },
-        {
             title: 'En Attente',
             value: '47',
             change: '-5%',
@@ -65,14 +56,6 @@ function Dashboard() {
             color: '#8b5cf6',
             bgColor: 'rgba(139, 92, 246, 0.1)',
         },
-    ];
-
-    const recentSignalements = [
-        { id: 1, title: 'Arnaque WhatsApp', user: 'Jean Dupont', status: 'En attente', date: '2025-12-07', priority: 'Haute' },
-        { id: 2, title: 'Faux site bancaire', user: 'Marie Martin', status: 'Validé', date: '2025-12-06', priority: 'Critique' },
-        { id: 3, title: 'Email phishing', user: 'Pierre Durant', status: 'En cours', date: '2025-12-06', priority: 'Moyenne' },
-        { id: 4, title: 'Appel frauduleux', user: 'Sophie Bernard', status: 'Validé', date: '2025-12-05', priority: 'Haute' },
-        { id: 5, title: 'SMS suspect', user: 'Luc Petit', status: 'En attente', date: '2025-12-05', priority: 'Basse' },
     ];
 
     const getStatusColor = (status) => {
@@ -249,74 +232,6 @@ function Dashboard() {
                     </Card>
                 </Grid>
 
-                {/* Recent Signalements Table */}
-                <Grid item xs={12}>
-                    <Card sx={{ borderRadius: 3, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-                        <CardContent sx={{ p: 3 }}>
-                            <Typography variant="h6" fontWeight={700} gutterBottom>
-                                Signalements récents
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: '#6b7280', mb: 3 }}>
-                                Les derniers signalements soumis par les utilisateurs
-                            </Typography>
-
-                            <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e5e7eb', borderRadius: 2 }}>
-                                <Table>
-                                    <TableHead>
-                                        <TableRow sx={{ bgcolor: '#f9fafb' }}>
-                                            <TableCell sx={{ fontWeight: 700 }}>ID</TableCell>
-                                            <TableCell sx={{ fontWeight: 700 }}>Titre</TableCell>
-                                            <TableCell sx={{ fontWeight: 700 }}>Utilisateur</TableCell>
-                                            <TableCell sx={{ fontWeight: 700 }}>Priorité</TableCell>
-                                            <TableCell sx={{ fontWeight: 700 }}>Statut</TableCell>
-                                            <TableCell sx={{ fontWeight: 700 }}>Date</TableCell>
-                                            <TableCell sx={{ fontWeight: 700 }}>Actions</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {recentSignalements.map((row) => (
-                                            <TableRow
-                                                key={row.id}
-                                                sx={{
-                                                    '&:hover': { bgcolor: '#f9fafb' },
-                                                    transition: 'background-color 0.2s'
-                                                }}
-                                            >
-                                                <TableCell>#{row.id}</TableCell>
-                                                <TableCell sx={{ fontWeight: 600 }}>{row.title}</TableCell>
-                                                <TableCell>{row.user}</TableCell>
-                                                <TableCell>
-                                                    <Chip
-                                                        label={row.priority}
-                                                        size="small"
-                                                        sx={{
-                                                            bgcolor: `${getPriorityColor(row.priority)}15`,
-                                                            color: getPriorityColor(row.priority),
-                                                            fontWeight: 600,
-                                                        }}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Chip
-                                                        label={row.status}
-                                                        size="small"
-                                                        color={getStatusColor(row.status)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>{row.date}</TableCell>
-                                                <TableCell>
-                                                    <IconButton size="small">
-                                                        <MoreVertIcon fontSize="small" />
-                                                    </IconButton>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </CardContent>
-                    </Card>
-                </Grid>
             </Grid>
         </Box>
     );

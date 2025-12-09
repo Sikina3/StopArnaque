@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import api from '../../services/api';
 import {
     Box,
     Card,
@@ -32,70 +33,49 @@ function AdminUsers() {
     const [searchTerm, setSearchTerm] = useState('');
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [users, setUsers] = useState([]);
+    const [onlineCount, setOnlineCount] = useState(0);
+    const [loading, setLoading] = useState(true);
 
-    // Données de démonstration
-    const users = [
-        {
-            id: 1,
-            name: 'Jean Dupont',
-            email: 'jean.dupont@email.com',
-            role: 'Utilisateur',
-            status: 'Actif',
-            signalements: 5,
-            joined: '2025-10-15',
-            avatar: 'JD',
-        },
-        {
-            id: 2,
-            name: 'Marie Martin',
-            email: 'marie.martin@email.com',
-            role: 'Utilisateur',
-            status: 'Actif',
-            signalements: 12,
-            joined: '2025-09-22',
-            avatar: 'MM',
-        },
-        {
-            id: 3,
-            name: 'Pierre Durant',
-            email: 'pierre.durant@email.com',
-            role: 'Modérateur',
-            status: 'Actif',
-            signalements: 8,
-            joined: '2025-08-10',
-            avatar: 'PD',
-        },
-        {
-            id: 4,
-            name: 'Sophie Bernard',
-            email: 'sophie.bernard@email.com',
-            role: 'Utilisateur',
-            status: 'Inactif',
-            signalements: 3,
-            joined: '2025-11-05',
-            avatar: 'SB',
-        },
-        {
-            id: 5,
-            name: 'Luc Petit',
-            email: 'luc.petit@email.com',
-            role: 'Utilisateur',
-            status: 'Actif',
-            signalements: 15,
-            joined: '2025-07-18',
-            avatar: 'LP',
-        },
-        {
-            id: 6,
-            name: 'Emma Rousseau',
-            email: 'emma.rousseau@email.com',
-            role: 'Utilisateur',
-            status: 'Bloqué',
-            signalements: 1,
-            joined: '2025-11-28',
-            avatar: 'ER',
-        },
-    ];
+    useEffect(() => {
+        fetchData();
+        const interval = setInterval(fetchOnlineUsers, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const fetchData = async () => {
+        setLoading(true);
+        await Promise.all([fetchUsers(), fetchOnlineUsers()]);
+        setLoading(false);
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const response = await api.get('/users');
+            const formattedUsers = response.data.map(user => ({
+                id: user.id,
+                name: user.name || user.pseudo || 'Utilisateur',
+                email: user.email,
+                role: user.admin ? 'Admin' : 'Utilisateur',
+                status: 'Actif',
+                signalements: user.signalements_count || 0,
+                joined: new Date(user.created_at).toLocaleDateString('fr-FR'),
+                avatar: (user.name || user.pseudo || 'U').substring(0, 2).toUpperCase(),
+            }));
+            setUsers(formattedUsers);
+        } catch (error) {
+            console.error('Erreur lors du chargement des utilisateurs:', error);
+        }
+    };
+
+    const fetchOnlineUsers = async () => {
+        try {
+            const response = await api.get('/users/online');
+            setOnlineCount(response.data.online_users);
+        } catch (error) {
+            console.error('Erreur lors du chargement des utilisateurs en ligne:', error);
+        }
+    };
 
     const handleMenuOpen = (event, user) => {
         setAnchorEl(event.currentTarget);
@@ -159,10 +139,10 @@ function AdminUsers() {
             {/* Stats Cards */}
             <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>
                 {[
-                    { label: 'Total Utilisateurs', value: '856', color: '#1F9EF9' },
-                    { label: 'Actifs', value: '742', color: '#10b981' },
-                    { label: 'Inactifs', value: '98', color: '#f59e0b' },
-                    { label: 'Bloqués', value: '16', color: '#ef4444' },
+                    { label: 'Total Utilisateurs', value: users.length, color: '#1F9EF9' },
+                    { label: 'En ligne', value: onlineCount, color: '#10b981' },
+                    { label: 'Inactifs', value: '0', color: '#f59e0b' },
+                    { label: 'Bloqués', value: '0', color: '#ef4444' },
                 ].map((stat, index) => (
                     <Card
                         key={index}
@@ -207,7 +187,7 @@ function AdminUsers() {
                             variant="contained"
                             sx={{ borderRadius: 2 }}
                         >
-                            Exporter
+                            Rechercher
                         </Button>
                     </Box>
                 </CardContent>

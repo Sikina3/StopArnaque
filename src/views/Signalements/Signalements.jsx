@@ -1,88 +1,74 @@
-import { Box, Container, Typography, Button, Grid, Select, MenuItem, FormControl } from "@mui/material";
+import { Box, Container, Typography, Button, Grid, Select, MenuItem, FormControl, CircularProgress } from "@mui/material";
 import { Input } from "@mui/joy";
 import SearchIcon from '@mui/icons-material/Search';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TopNav from "../../components/TopNav";
 import Footer from "../../components/Footer";
 import CardSignalement from "../../components/CardSignalement";
-import image from "../../assets/Soya.png";
-import image2 from "../../assets/animals.png";
+import api from "../../services/api";
 
 function Signalements() {
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
     const [statusFilter, setStatusFilter] = useState("all");
     const [dateFilter, setDateFilter] = useState("");
+    const [signalements, setSignalements] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Données fictives pour l'exemple
-    const signalements = [
-        {
-            id: 1,
-            titre: "Faux support technique Microsoft",
-            categorie: "Phishing",
-            statut: "Validé",
-            date: "2023-10-26",
-            dateAffichage: "2 jours",
-            likes: 2,
-            comments: 5,
-            image: image
-        },
-        {
-            id: 2,
-            titre: "Offre d'emploi frauduleuse LinkedIn",
-            categorie: "Faux emplois",
-            statut: "En attente",
-            date: "2023-11-01",
-            dateAffichage: "1 jour",
-            likes: 0,
-            comments: 3,
-            image: image2
-        },
-        {
-            id: 3,
-            titre: "Investissement crypto miracle",
-            categorie: "Faux investissements",
-            statut: "Validé",
-            date: "2023-11-15",
-            dateAffichage: "3 jours",
-            likes: 8,
-            comments: 12,
-            image: image
-        },
-        {
-            id: 4,
-            titre: "Livraison colis UPS non réclamé",
-            categorie: "Smishing",
-            statut: "Validé",
-            date: "2023-11-20",
-            dateAffichage: "5 jours",
-            likes: 4,
-            comments: 2,
-            image: image2
-        },
-        {
-            id: 5,
-            titre: "Appel bancaire frauduleux",
-            categorie: "Usurpation d'identité",
-            statut: "En attente",
-            date: "2023-11-28",
-            dateAffichage: "1 semaine",
-            likes: 1,
-            comments: 0,
-            image: image
-        },
-        {
-            id: 6,
-            titre: "Vente de véhicule d'occasion inexistante",
-            categorie: "Fraude à la vente",
-            statut: "Validé",
-            date: "2023-12-05",
-            dateAffichage: "2 semaines",
-            likes: 6,
-            comments: 8,
-            image: image2
-        }
-    ];
+    // Fonction pour récupérer les signalements depuis l'API
+    useEffect(() => {
+        const fetchSignalements = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get('/signalements');
+                console.log('Signalements récupérés:', response.data);
+
+                // Vérifier que la réponse est bien un tableau
+                if (Array.isArray(response.data)) {
+                    setSignalements(response.data);
+                    setError(null);
+                } else {
+                    console.error('Format de données invalide:', response.data);
+                    setError('Format de données invalide reçu du serveur.');
+                }
+            } catch (err) {
+                console.error('Erreur lors de la récupération des signalements:', err);
+                setError('Impossible de charger les signalements. Veuillez réessayer plus tard.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSignalements();
+    }, []);
+
+    // Fonction pour calculer le temps écoulé depuis la création
+    const getTimeAgo = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+
+        if (diffInSeconds < 60) return `${diffInSeconds} secondes`;
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} heures`;
+        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} jours`;
+        if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)} semaines`;
+        return `${Math.floor(diffInSeconds / 2592000)} mois`;
+    };
+
+    // Filtrer les signalements
+    const filteredSignalements = signalements.filter((signal) => {
+        const matchesSearch = searchTerm === "" ||
+            signal.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            signal.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (signal.signal?.nom && signal.signal.nom.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        const matchesType = typeFilter === "all" || signal.type.toLowerCase() === typeFilter.toLowerCase();
+        const matchesStatus = statusFilter === "all" || signal.status.toLowerCase().includes(statusFilter.toLowerCase());
+
+        return matchesSearch && matchesType && matchesStatus;
+    });
 
     const handleApplyFilters = () => {
         console.log("Filtres appliqués:", { searchTerm, typeFilter, statusFilter, dateFilter });
@@ -234,22 +220,85 @@ function Signalements() {
                     </Box>
 
                     {/* Liste des signalements */}
-                    <Grid container spacing={4} sx={{ justifyContent: "center" }}>
-                        {signalements.map((signal, index) => (
-                            <CardSignalement
-                                key={index}
-                                id={signal.id}
-                                titre={signal.titre}
-                                categorie={signal.categorie}
-                                date={signal.dateAffichage}
-                                LikeNumber={signal.likes.toString()}
-                                ChatNumber={signal.comments}
-                                image={signal.image}
-                            />
-                        ))}
-                    </Grid>
-                </Container>
-            </Box>
+                    {loading ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+                            <CircularProgress size={60} sx={{ color: '#1F9EF9' }} />
+                        </Box>
+                    ) : error ? (
+                        <Box sx={{
+                            textAlign: 'center',
+                            py: 8,
+                            backgroundColor: 'white',
+                            borderRadius: 4,
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+                        }}>
+                            <Typography variant="h6" color="error" sx={{ mb: 2 }}>
+                                {error}
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                onClick={() => window.location.reload()}
+                                sx={{
+                                    background: 'linear-gradient(45deg, #1F9EF9 30%, #21CBF3 90%)',
+                                    textTransform: 'none',
+                                    fontWeight: 600
+                                }}
+                            >
+                                Réessayer
+                            </Button>
+                        </Box>
+                    ) : filteredSignalements.length === 0 ? (
+                        <Box sx={{
+                            textAlign: 'center',
+                            py: 8,
+                            backgroundColor: 'white',
+                            borderRadius: 4,
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+                        }}>
+                            <Typography variant="h6" sx={{ color: '#999', fontFamily: 'Lato' }}>
+                                Aucun signalement trouvé
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#ccc', mt: 1 }}>
+                                Essayez de modifier vos filtres ou ajoutez un nouveau signalement
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <Grid container spacing={4} sx={{ justifyContent: "center" }}>
+                            {filteredSignalements.map((signal) => {
+                                // Récupérer la première image de preuve
+                                let imageUrl = 'https://via.placeholder.com/400x300?text=Aucune+image';
+
+                                if (signal.preuves && signal.preuves.length > 0 && signal.preuves[0].image) {
+                                    const imageData = signal.preuves[0].image;
+                                    // Si l'image commence par 'data:', c'est déjà une URL base64 complète
+                                    // Sinon, on ajoute le préfixe
+                                    if (imageData.startsWith('data:')) {
+                                        imageUrl = imageData;
+                                    } else if (imageData.startsWith('http')) {
+                                        imageUrl = imageData;
+                                    } else {
+                                        // Assumer que c'est du base64 sans préfixe
+                                        imageUrl = `data:image/jpeg;base64,${imageData}`;
+                                    }
+                                }
+
+                                return (
+                                    <CardSignalement
+                                        key={signal.id}
+                                        id={signal.id}
+                                        titre={signal.titre}
+                                        categorie={signal.type}
+                                        date={getTimeAgo(signal.created_at)}
+                                        LikeNumber="0"
+                                        ChatNumber={0}
+                                        image={imageUrl}
+                                    />
+                                );
+                            })}
+                        </Grid>
+                    )}
+                </Container >
+            </Box >
             <Footer />
         </>
     );
