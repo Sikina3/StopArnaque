@@ -56,7 +56,7 @@ function SignalementDetails() {
         if (!imageData) return null;
         if (imageData.startsWith('data:') || imageData.startsWith('http')) return imageData;
         // Assuming it's a storage path
-        return `http://localhost:8000/storage/${imageData}`;
+        return `https://verlie-nonprosperous-pearl.ngrok-free.dev/storage/${imageData}`;
     };
 
     if (loading) {
