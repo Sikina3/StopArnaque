@@ -269,17 +269,10 @@ function Signalements() {
                                 let imageUrl = 'https://via.placeholder.com/400x300?text=Aucune+image';
 
                                 if (signal.preuves && signal.preuves.length > 0 && signal.preuves[0].image) {
-                                    const imageData = signal.preuves[0].image;
-                                    // Si l'image commence par 'data:', c'est déjà une URL base64 complète
-                                    // Sinon, on ajoute le préfixe
-                                    if (imageData.startsWith('data:')) {
-                                        imageUrl = imageData;
-                                    } else if (imageData.startsWith('http')) {
-                                        imageUrl = imageData;
-                                    } else {
-                                        // Assumer que c'est du base64 sans préfixe
-                                        imageUrl = `data:image/jpeg;base64,${imageData}`;
-                                    }
+                                    const imagePath = signal.preuves[0].image;
+                                    imageUrl = `http://localhost:8000/storage/${imagePath}`;
+                                    console.log("Image Url:", imageUrl);
+
                                 }
 
                                 return (

@@ -55,11 +55,8 @@ function SignalementDetails() {
     const getImageUrl = (imageData) => {
         if (!imageData) return null;
         if (imageData.startsWith('data:') || imageData.startsWith('http')) return imageData;
-        // Si c'est un nom de fichier (trop court pour être du base64 d'image), on retourne null pour utiliser le fallback
-        if (imageData.length < 200) {
-            return null;
-        }
-        return `data:image/jpeg;base64,${imageData}`;
+        // Assuming it's a storage path
+        return `http://localhost:8000/storage/${imageData}`;
     };
 
     if (loading) {

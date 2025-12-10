@@ -57,7 +57,7 @@ function AdminUsers() {
                 name: user.name || user.pseudo || 'Utilisateur',
                 email: user.email,
                 role: user.admin ? 'Admin' : 'Utilisateur',
-                status: 'Actif',
+                status: user.is_online ? 'En ligne' : 'Hors ligne',
                 signalements: user.signalements_count || 0,
                 joined: new Date(user.created_at).toLocaleDateString('fr-FR'),
                 avatar: (user.name || user.pseudo || 'U').substring(0, 2).toUpperCase(),
@@ -103,8 +103,8 @@ function AdminUsers() {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'Actif': return 'success';
-            case 'Inactif': return 'warning';
+            case 'En ligne': return 'success';
+            case 'Hors ligne': return 'default';
             case 'Bloqué': return 'error';
             default: return 'default';
         }
@@ -141,7 +141,7 @@ function AdminUsers() {
                 {[
                     { label: 'Total Utilisateurs', value: users.length, color: '#1F9EF9' },
                     { label: 'En ligne', value: onlineCount, color: '#10b981' },
-                    { label: 'Inactifs', value: '0', color: '#f59e0b' },
+                    { label: 'Hors ligne', value: users.length - onlineCount, color: '#6b7280' },
                     { label: 'Bloqués', value: '0', color: '#ef4444' },
                 ].map((stat, index) => (
                     <Card

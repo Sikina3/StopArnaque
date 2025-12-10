@@ -7,6 +7,7 @@ import { Check, FileOpen, KeyboardArrowDown } from "@mui/icons-material";
 import FilePicker from "../components/FilePicker";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import SubmissionStatus from "../components/SubmissionStatus";
 
 const steps = ['type et details', 'Preuves et pieces justificatives', 'Vos coordonnées (Confidentiel)'];
 
@@ -25,6 +26,9 @@ function FormSignal() {
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+
     useEffect(() => {
         if (user) {
             setFullName(user?.name || "");
@@ -41,33 +45,59 @@ function FormSignal() {
     };
 
     const handleSUbmit = async () => {
+        if (!user) {
+            alert("Vous devez être connecté pour signaler une arnaque.");
+            return;
+        }
+
         try {
-            const formData = {
-                nom: scammerName,
-                contact: contact,
-                description: description,
-                titre: "Arnaque sur" + type + " " + city,
-                type: type,
-                utilisateur_id: user?.id,
-                preuves: proofs.map(f => f.name),
-            };
+            setIsSubmitting(true);
+            const data = new FormData();
 
-            const res = await api.post("/signalements", formData);
+            data.append("nom", scammerName);
+            data.append("contact", contact);
+            data.append("description", description);
+            data.append("titre", "Arnaque sur " + type + " " + city);
+            data.append("type", type);
+            data.append("utilisateur_id", user.id);
 
+            // Ajouter les fichiers réels (pas leurs noms)
+            proofs.forEach((file) => {
+                data.append("preuves[]", file);
+            });
+
+            const res = await api.post("/signalements", data, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            // Mise à jour du profil de l'utilisateur
             const userData = {
                 name: user?.name || fullName,
                 ville: user?.ville || city,
                 email: user?.email || email,
                 phone: user?.phone || phone
-            }
+            };
 
-            const resUser = await api.put(`/users/${user.id}`, userData);
+            await api.put(`/users/${user.id}`, userData);
 
-            console.log("Enregistrer avec succes! ")
+            console.log("Enregistrer avec succès !");
+            setIsSubmitting(false);
+            setIsSuccess(true);
         } catch (error) {
-            console.log(error);
+            console.error("Erreur lors de la soumission:", error);
+            if (error.response && error.response.status === 422) {
+                console.log("Erreurs de validation:", error.response.data.errors);
+                const errorMessages = Object.values(error.response.data.errors).flat().join('\n');
+                alert(`Erreur de validation:\n${errorMessages}`);
+            } else {
+                alert("Une erreur est survenue lors de l'envoi du signalement.");
+            }
+            setIsSubmitting(false);
         }
-    }
+    };
+
 
     const Step0 = (
         <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: { md: 500, xs: 400 } }}>
@@ -173,88 +203,94 @@ function FormSignal() {
                 alignItems: "center",
                 paddingX: { md: 15, xs: 8 }
             }}>
-                <Stepper sx={{ width: '100%', marginBottom: 6 }}>
-                    {steps.map((label, index) => (
-                        <Step
-                            key={label}
-                            indicator={
-                                <StepIndicator
-                                    variant={activeStep <= index ? "soft" : "solid"}
-                                    color={activeStep < index ? "neutral" : "primary"}
+                {isSubmitting || isSuccess ? (
+                    <SubmissionStatus isSuccess={isSuccess} />
+                ) : (
+                    <>
+                        <Stepper sx={{ width: '100%', marginBottom: 6 }}>
+                            {steps.map((label, index) => (
+                                <Step
+                                    key={label}
+                                    indicator={
+                                        <StepIndicator
+                                            variant={activeStep <= index ? "soft" : "solid"}
+                                            color={activeStep < index ? "neutral" : "primary"}
+                                        >
+                                            {activeStep <= index ? index + 1 : <Check />}
+                                        </StepIndicator>
+                                    }
+                                    sx={[
+                                        activeStep > index && index !== 2 && { '&::after': { bgcolor: 'primary.solidBg' } },
+                                    ]}
                                 >
-                                    {activeStep <= index ? index + 1 : <Check />}
-                                </StepIndicator>
-                            }
-                            sx={[
-                                activeStep > index && index !== 2 && { '&::after': { bgcolor: 'primary.solidBg' } },
-                            ]}
-                        >
-                            <StepButton
-                                onClick={() => setActiveStep(index)}
-                                sx={{ display: { xs: "none", md: "block" } }}>{label}</StepButton>
-                        </Step>
-                    ))}
-                </Stepper>
+                                    <StepButton
+                                        onClick={() => setActiveStep(index)}
+                                        sx={{ display: { xs: "none", md: "block" } }}>{label}</StepButton>
+                                </Step>
+                            ))}
+                        </Stepper>
 
-                <Typography sx={{ fontSize: { md: "1.8rem", xs: "1.2rem" }, fontWeight: 600, fontFamily: "Lato", marginBottom: 5 }}>
-                    Signaler une Arnaque
-                </Typography>
+                        <Typography sx={{ fontSize: { md: "1.8rem", xs: "1.2rem" }, fontWeight: 600, fontFamily: "Lato", marginBottom: 5 }}>
+                            Signaler une Arnaque
+                        </Typography>
 
-                {contents[activeStep]}
+                        {contents[activeStep]}
 
-                <Box sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    width: { xs: "100%", md: 500 },
-                    marginTop: 6
-                }}>
-                    <Button
-                        disabled={activeStep === 0}
-                        onClick={() => setActiveStep(prev => prev - 1)}
-                        style={{
-                            padding: "10px 20px",
-                            borderRadius: "6px",
-                            border: "1px solid #ccc",
-                            background: activeStep === 0 ? "#eee" : "white",
-                            color: activeStep > 0 ? "2e7d32" : "gray",
-                            cursor: activeStep === 0 ? "not-allowed" : "pointer",
-                        }}
-                        sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }}
-                    >
-                        Precedent
-                    </Button>
+                        <Box sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            width: { xs: "100%", md: 500 },
+                            marginTop: 6
+                        }}>
+                            <Button
+                                disabled={activeStep === 0}
+                                onClick={() => setActiveStep(prev => prev - 1)}
+                                style={{
+                                    padding: "10px 20px",
+                                    borderRadius: "6px",
+                                    border: "1px solid #ccc",
+                                    background: activeStep === 0 ? "#eee" : "white",
+                                    color: activeStep > 0 ? "2e7d32" : "gray",
+                                    cursor: activeStep === 0 ? "not-allowed" : "pointer",
+                                }}
+                                sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }}
+                            >
+                                Precedent
+                            </Button>
 
-                    {activeStep < 2 ? (
-                        <Button
-                            onClick={() => setActiveStep(prev => prev + 1)}
-                            style={{
-                                padding: "10px 20px",
-                                borderRadius: "6px",
-                                background: "#1976d2",
-                                color: "white",
-                                border: "none",
-                                cursor: "pointer",
-                                fontSize: { xs: "0.8rem", md: "1rem" }
-                            }}
-                            sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }}
-                        >
-                            Suivant
-                        </Button>
-                    ) : (
-                        <Button onClick={handleSUbmit}
-                            style={{
-                                padding: "10px 20px",
-                                borderRadius: "6px",
-                                background: "2e7d32",
-                                color: "white",
-                                border: "none",
-                                cursor: "pointer",
-                            }}
-                        >
-                            Envoyer
-                        </Button>
-                    )}
-                </Box>
+                            {activeStep < 2 ? (
+                                <Button
+                                    onClick={() => setActiveStep(prev => prev + 1)}
+                                    style={{
+                                        padding: "10px 20px",
+                                        borderRadius: "6px",
+                                        background: "#1976d2",
+                                        color: "white",
+                                        border: "none",
+                                        cursor: "pointer",
+                                        fontSize: { xs: "0.8rem", md: "1rem" }
+                                    }}
+                                    sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }}
+                                >
+                                    Suivant
+                                </Button>
+                            ) : (
+                                <Button onClick={handleSUbmit}
+                                    style={{
+                                        padding: "10px 20px",
+                                        borderRadius: "6px",
+                                        background: "2e7d32",
+                                        color: "white",
+                                        border: "none",
+                                        cursor: "pointer",
+                                    }}
+                                >
+                                    Envoyer
+                                </Button>
+                            )}
+                        </Box>
+                    </>
+                )}
             </Box>
 
             <Footer />
