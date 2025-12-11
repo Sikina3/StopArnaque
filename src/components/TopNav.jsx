@@ -210,11 +210,13 @@ function TopNav() {
                   </MenuButton>
 
                   <JoyMenu
+                    placement="bottom-end"
                     sx={{
                       minWidth: 200,
                       boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
                       borderRadius: 2,
                       p: 1,
+                      zIndex: 2000
                     }}
                   >
                     <JoyMenuItem
