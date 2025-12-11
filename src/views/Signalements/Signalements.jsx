@@ -276,7 +276,7 @@ function Signalements() {
 
                                 if (signal.preuves && signal.preuves.length > 0 && signal.preuves[0].image) {
                                     const imagePath = signal.preuves[0].image;
-                                    imageUrl = `http://127.0.0.1:8000/storage/${imagePath}`;
+                                    imageUrl = `https://verlie-nonprosperous-pearl.ngrok-free.dev/storage/${imagePath}`;
                                     console.log("Image Url:", imageUrl);
 
                                 }

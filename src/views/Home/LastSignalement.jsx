@@ -113,7 +113,7 @@ function LastSignalement() {
                 let imageUrl = 'https://via.placeholder.com/400x300?text=Aucune+image';
                 if (signal.preuves && signal.preuves.length > 0 && signal.preuves[0].image) {
                   const imagePath = signal.preuves[0].image;
-                  imageUrl = `http://127.0.0.1:8000/storage/${imagePath}`;
+                  imageUrl = `https://verlie-nonprosperous-pearl.ngrok-free.dev/storage/${imagePath}`;
                 }
 
                 return (
