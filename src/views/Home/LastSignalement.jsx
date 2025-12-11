@@ -1,12 +1,49 @@
 import { Box, Button, Grid, Typography, Container } from "@mui/material";
 import CardSignalement from "../../components/CardSignalement";
-import image from "../../assets/Soya.png";
-import image2 from "../../assets/animals.png";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import api from "../../services/api";
 
 function LastSignalement() {
   const navigate = useNavigate();
+  const [signalements, setSignalements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchSignalements = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/signalements');
+
+        if (Array.isArray(response.data)) {
+          setSignalements(response.data);
+          setError(null);
+        } else {
+          setError('Format de données invalide recu du serveur.');
+        }
+      } catch (err) {
+        setError('Impossible de charger les signalements. Veuillez réessayer plus tard.');
+      } finally {
+        setLoading(false);
+      };
+    }
+    fetchSignalements();
+  }, []);
+
+  const getTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return `${diffInSeconds} secondes`;
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} heures`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} jours`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)} semaines`;
+    return `${Math.floor(diffInSeconds / 2592000)} mois`;
+  };
 
   return (
     <Box
@@ -25,7 +62,7 @@ function LastSignalement() {
             variant="h4"
             fontWeight={800}
             gutterBottom
-            sx={{ fontFamily: "Lato", color: "#1A1A1A", fontSize: {xs: "1.6rem", md: "2rem"} }}
+            sx={{ fontFamily: "Lato", color: "#1A1A1A", fontSize: { xs: "1.6rem", md: "2rem" } }}
           >
             Derniers signalements validés
           </Typography>
@@ -57,25 +94,37 @@ function LastSignalement() {
           spacing={4}
           sx={{ justifyContent: "center", mb: 6 }}
         >
-          <CardSignalement
-            id={1}
-            titre={"Signalement de phishing de page facebook"}
-            categorie={"Phishing"}
-            date={"2 jours"}
-            LikeNumber={"2"}
-            ChatNumber={5}
-            image={image}
-          />
+          {loading ? (
+            <Typography>Chargement...</Typography>
+          ) : error ? (
+            <Typography color="error">{error}</Typography>
+          ) : (
+            signalements
+              .filter(s => s.status === 'Validé')
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .slice(0, 3)
+              .map((signal) => {
+                let imageUrl = 'https://via.placeholder.com/400x300?text=Aucune+image';
+                if (signal.preuves && signal.preuves.length > 0 && signal.preuves[0].image) {
+                  const imagePath = signal.preuves[0].image;
+                  imageUrl = `http://127.0.0.1:8000/storage/${imagePath}`;
+                }
 
-          <CardSignalement
-            id={2}
-            titre={"Vendeur en ligne qui falsifie les livraisons"}
-            categorie={"Falsification de produits"}
-            date={"1 jour"}
-            LikeNumber={"0"}
-            ChatNumber={0}
-            image={image2}
-          />
+                return (
+                  <CardSignalement
+                    key={signal.id}
+                    id={signal.id}
+                    titre={signal.titre}
+                    categorie={signal.type}
+                    date={getTimeAgo(signal.created_at)}
+                    LikeNumber={signal.reactions_count}
+                    ChatNumber={signal.commentaires_count}
+                    image={imageUrl}
+                    isLiked={signal.is_liked}
+                  />
+                );
+              })
+          )}
         </Grid>
 
         <Box sx={{ textAlign: "center" }}>

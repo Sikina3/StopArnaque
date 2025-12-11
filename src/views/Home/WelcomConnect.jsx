@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import { Box, Typography, Grid, Card, Button, Container, Stack } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
+import api from "../../services/api";
 import AddIcon from '@mui/icons-material/Add';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -9,11 +11,41 @@ import { useNavigate } from "react-router-dom";
 function WelcomConnect() {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [statsData, setStatsData] = useState({
+        submitted: 0,
+        validated: 0,
+        favorites: 0
+    });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            if (!user) return;
+            try {
+                const response = await api.get('/signalements');
+                // Filtrer les signalements de l'utilisateur connecté
+                const mySignalements = response.data.filter(s => s.utilisateur_id === user.id);
+                console.log("Les signalements: ", mySignalements);
+
+                const submitted = mySignalements.length;
+                const validated = mySignalements.filter(s => s.status === 'Validé').length;
+
+                setStatsData({
+                    submitted,
+                    validated,
+                    favorites: 0
+                });
+            } catch (error) {
+                console.error("Erreur lors du chargement des statistiques:", error);
+            }
+        };
+
+        fetchStats();
+    }, [user]);
 
     const stats = [
-        { label: "Signalements soumis", value: 12, icon: <SecurityIcon fontSize="large" color="primary" /> },
-        { label: "Signalements Validés", value: 12, icon: <ChecklistIcon fontSize="large" color="success" /> },
-        { label: "Favoris", value: 12, icon: <FavoriteBorderIcon fontSize="large" color="error" /> },
+        { label: "Signalements soumis", value: statsData.submitted, icon: <SecurityIcon fontSize="large" color="primary" /> },
+        { label: "Signalements Validés", value: statsData.validated, icon: <ChecklistIcon fontSize="large" color="success" /> },
+        { label: "Favoris", value: statsData.favorites, icon: <FavoriteBorderIcon fontSize="large" color="error" /> },
     ];
 
     return (

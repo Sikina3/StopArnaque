@@ -22,7 +22,6 @@ function Signalements() {
             try {
                 setLoading(true);
                 const response = await api.get('/signalements');
-                console.log('Signalements récupérés:', response.data);
 
                 // Vérifier que la réponse est bien un tableau
                 if (Array.isArray(response.data)) {
@@ -282,9 +281,10 @@ function Signalements() {
                                         titre={signal.titre}
                                         categorie={signal.type}
                                         date={getTimeAgo(signal.created_at)}
-                                        LikeNumber="0"
-                                        ChatNumber={0}
+                                        LikeNumber={signal.reactions_count}
+                                        ChatNumber={signal.commentaires_count}
                                         image={imageUrl}
+                                        isLiked={signal.is_liked}
                                     />
                                 );
                             })}

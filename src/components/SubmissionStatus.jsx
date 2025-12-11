@@ -10,7 +10,7 @@ const SubmissionStatus = ({ isSuccess }) => {
         if (isSuccess) {
             const timer = setTimeout(() => {
                 navigate('/signalements');
-            }, 20000); // 20 seconds
+            }, 2000); // 2 seconds
 
             return () => clearTimeout(timer);
         }

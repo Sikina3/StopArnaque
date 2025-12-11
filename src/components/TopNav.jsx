@@ -24,7 +24,8 @@ import NotificationMenu from "./NotificationMenu";
 
 const pages = [
   { label: "Accueil", route: "/" },
-  { label: "Signaler", route: "/signaler" }
+  { label: "Signaler", route: "/signaler" },
+  { label: "Liste signalement", route: "/signalements" }
 ];
 
 function TopNav() {
@@ -294,7 +295,7 @@ function TopNav() {
                   Connexion
                 </Button>
                 <Button
-                  onClick={() => navigate("/signup")}
+                  onClick={() => navigate("/login")}
                   variant="contained"
                   sx={{
                     display: { xs: "none", md: "inline-flex" },

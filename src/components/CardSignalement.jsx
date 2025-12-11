@@ -1,11 +1,35 @@
-import { Box, Button, Grid, Paper, Typography } from "@mui/material";
+import { Box, Button, Grid, Paper, Typography, IconButton } from "@mui/material";
 import Divider from '@mui/material/Divider';
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import api from "../services/api";
 
-function CardSignalement({ id, titre, categorie, date, LikeNumber, ChatNumber, image }) {
+function CardSignalement({ id, titre, categorie, date, LikeNumber, ChatNumber, image, isLiked }) {
   const navigate = useNavigate();
+  const [likes, setLikes] = useState(parseInt(LikeNumber) || 0);
+  const [liked, setLiked] = useState(isLiked);
+
+  const handleLike = async (e) => {
+    e.preventDefault(); // Prevent navigation if inside a link
+
+    // Optimistic update
+    const newLiked = !liked;
+    setLiked(newLiked);
+    setLikes(prev => newLiked ? prev + 1 : prev - 1);
+
+    try {
+      await api.post('/reactions/toggle', { signalement_id: id });
+    } catch (error) {
+      console.error("Erreur like:", error);
+      // Revert
+      setLiked(!newLiked);
+      setLikes(prev => newLiked ? prev - 1 : prev + 1);
+    }
+  };
+
   return (
     <Grid item xs={12} sm={6} md={4} sx={{ display: 'flex' }}>
       <Paper
@@ -123,17 +147,28 @@ function CardSignalement({ id, titre, categorie, date, LikeNumber, ChatNumber, i
           }}
         >
           <Box sx={{ display: "flex", gap: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <FavoriteBorderOutlinedIcon
-                sx={{
-                  color: "#999",
-                  fontSize: { xs: 18, md: 22 },
-                  transition: "color 0.2s",
-                  "&:hover": { color: "#e74c3c" }
-                }}
-              />
-              <Typography sx={{ color: "#999", fontSize: { xs: "0.75rem", md: "0.85rem" } }}>
-                {LikeNumber}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, cursor: 'pointer' }} onClick={handleLike}>
+              {liked ? (
+                <FavoriteIcon
+                  sx={{
+                    color: "#e74c3c",
+                    fontSize: { xs: 18, md: 22 },
+                    transition: "transform 0.2s",
+                    "&:active": { transform: "scale(1.2)" }
+                  }}
+                />
+              ) : (
+                <FavoriteBorderOutlinedIcon
+                  sx={{
+                    color: "#999",
+                    fontSize: { xs: 18, md: 22 },
+                    transition: "color 0.2s",
+                    "&:hover": { color: "#e74c3c" }
+                  }}
+                />
+              )}
+              <Typography sx={{ color: liked ? "#e74c3c" : "#999", fontSize: { xs: "0.75rem", md: "0.85rem" }, fontWeight: liked ? 600 : 400 }}>
+                {likes}
               </Typography>
             </Box>
 

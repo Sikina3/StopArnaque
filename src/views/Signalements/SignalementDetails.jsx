@@ -1,4 +1,4 @@
-import { Box, Container, Typography, Chip, Grid, Paper, Avatar, Divider, Button, CircularProgress } from "@mui/material";
+import { Box, Container, Typography, Chip, Grid, Paper, Avatar, Divider, Button, CircularProgress, TextField } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import TopNav from "../../components/TopNav";
@@ -13,17 +13,22 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import SendIcon from '@mui/icons-material/Send';
 import ImageIcon from '@mui/icons-material/Image';
 import imageDefault from "../../assets/Soya.png";
 import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 function SignalementDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [liked, setLiked] = useState(false);
     const [signalement, setSignalement] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState("");
 
     useEffect(() => {
         const fetchSignalementDetails = async () => {
@@ -32,6 +37,8 @@ function SignalementDetails() {
                 const response = await api.get(`/signalements/${id}`);
                 console.log("Détails signalement:", response.data);
                 setSignalement(response.data);
+                setComments(response.data.commentaires || []);
+                setLiked(response.data.is_liked);
                 setError(null);
             } catch (err) {
                 console.error("Erreur récupération détails:", err);
@@ -45,6 +52,53 @@ function SignalementDetails() {
             fetchSignalementDetails();
         }
     }, [id]);
+
+    const handleLike = async () => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+
+        const newLiked = !liked;
+        setLiked(newLiked);
+
+        try {
+            await api.post('/reactions/toggle', { signalement_id: id });
+        } catch (error) {
+            console.error("Erreur like:", error);
+            setLiked(!newLiked);
+        }
+    };
+
+    const handleCommentSubmit = async () => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+
+        if (!newComment.trim()) return;
+
+        try {
+            const response = await api.post('/commentaires', {
+                contenue: newComment,
+                signalement_id: id,
+                utilisateur_id: user.id
+            });
+
+            // Add the new comment to the list (optimistic or from response)
+            // The response should contain the created comment. 
+            // We need to ensure it has the user object for display.
+            const createdComment = {
+                ...response.data,
+                utilisateur: user
+            };
+
+            setComments([createdComment, ...comments]);
+            setNewComment("");
+        } catch (error) {
+            console.error("Erreur commentaire:", error);
+        }
+    };
 
     const formatDate = (dateString) => {
         if (!dateString) return "Date inconnue";
@@ -226,11 +280,12 @@ function SignalementDetails() {
                                     Interactions
                                 </Typography>
 
-                                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                                     <Button
                                         variant={liked ? "contained" : "outlined"}
                                         startIcon={liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-                                        onClick={() => setLiked(!liked)}
+                                        onClick={handleLike}
+                                        fullWidth
                                         sx={{
                                             textTransform: "none",
                                             fontWeight: 600,
@@ -246,26 +301,127 @@ function SignalementDetails() {
                                             })
                                         }}
                                     >
-                                        {liked ? "Aimé" : "J'aime"} (0)
-                                    </Button>
-
-                                    <Button
-                                        variant="outlined"
-                                        startIcon={<ChatBubbleOutlineIcon />}
-                                        sx={{
-                                            textTransform: "none",
-                                            fontWeight: 600,
-                                            borderRadius: 2,
-                                            py: 1.5,
-                                            borderColor: "#1F9EF9",
-                                            color: "#1F9EF9",
-                                            "&:hover": { borderColor: "#008ae6", backgroundColor: "rgba(31, 158, 249, 0.1)" }
-                                        }}
-                                    >
-                                        Commenter (0)
+                                        {liked ? "Aimé" : "J'aime"} ({signalement.reactions_count + (liked && !signalement.is_liked ? 1 : 0) - (!liked && signalement.is_liked ? 1 : 0)})
                                     </Button>
                                 </Box>
                             </Paper>
+                        </Grid>
+
+                        {/* Section Commentaires Redesigned */}
+                        <Grid item xs={12} id="comment-section">
+                            <Box sx={{ mt: 2 }}>
+                                <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                                    <ChatBubbleOutlineIcon sx={{ color: "#1F9EF9", mr: 1.5, fontSize: 28 }} />
+                                    <Typography variant="h5" fontWeight={800} sx={{ fontFamily: "Lato", color: "#1A1A1A" }}>
+                                        Discussion ({comments.length})
+                                    </Typography>
+                                </Box>
+
+                                <Paper sx={{ borderRadius: 4, overflow: "hidden", border: "1px solid #f0f0f0", boxShadow: "0 4px 20px rgba(0,0,0,0.02)" }}>
+                                    {/* Liste des commentaires */}
+                                    <Box sx={{ bgcolor: "#fff", p: 0 }}>
+                                        {comments.length === 0 ? (
+                                            <Box sx={{ p: 6, textAlign: "center", bgcolor: "#fcfcfc" }}>
+                                                <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                                                    Aucun commentaire pour le moment.
+                                                </Typography>
+                                                <Typography variant="body2" color="text.disabled">
+                                                    Soyez le premier à partager votre avis sur ce signalement.
+                                                </Typography>
+                                            </Box>
+                                        ) : (
+                                            <Box sx={{ maxHeight: '600px', overflowY: 'auto' }}>
+                                                {comments.map((comment, index) => (
+                                                    <Box key={comment.id}>
+                                                        <Box sx={{ p: 3, display: "flex", gap: 2, transition: "background-color 0.2s", "&:hover": { bgcolor: "#fafafa" } }}>
+                                                            <Avatar
+                                                                sx={{
+                                                                    bgcolor: `hsl(${(comment.utilisateur?.id * 137) % 360}, 70%, 50%)`,
+                                                                    width: 44,
+                                                                    height: 44,
+                                                                    fontSize: "1.1rem",
+                                                                    fontWeight: "bold",
+                                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                                                                }}
+                                                            >
+                                                                {comment.utilisateur?.name ? comment.utilisateur.name[0].toUpperCase() : "U"}
+                                                            </Avatar>
+                                                            <Box sx={{ flex: 1 }}>
+                                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.5 }}>
+                                                                    <Typography variant="subtitle1" fontWeight={700} sx={{ color: "#2c3e50" }}>
+                                                                        {comment.utilisateur?.name || "Utilisateur"}
+                                                                    </Typography>
+                                                                    <Typography variant="caption" sx={{ color: "#95a5a6", fontWeight: 500 }}>
+                                                                        {formatDate(comment.created_at)}
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Typography variant="body1" sx={{ color: "#4a5568", lineHeight: 1.6, fontSize: "0.95rem" }}>
+                                                                    {comment.contenue}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Box>
+                                                        {index < comments.length - 1 && <Divider sx={{ borderColor: "#f5f5f5" }} />}
+                                                    </Box>
+                                                ))}
+                                            </Box>
+                                        )}
+                                    </Box>
+
+                                    {/* Zone de saisie */}
+                                    <Box sx={{ p: 3, bgcolor: "#f8f9fa", borderTop: "1px solid #f0f0f0" }}>
+                                        <Box sx={{ display: "flex", gap: 2 }}>
+                                            <Avatar sx={{ bgcolor: "#1F9EF9", width: 40, height: 40 }}>
+                                                {user?.name ? user.name[0].toUpperCase() : <PersonIcon />}
+                                            </Avatar>
+                                            <Box sx={{ flex: 1 }}>
+                                                <TextField
+                                                    fullWidth
+                                                    multiline
+                                                    minRows={2}
+                                                    maxRows={4}
+                                                    placeholder={user ? "Ajouter un commentaire..." : "Connectez-vous pour commenter"}
+                                                    value={newComment}
+                                                    onChange={(e) => setNewComment(e.target.value)}
+                                                    disabled={!user}
+                                                    sx={{
+                                                        bgcolor: "#fff",
+                                                        borderRadius: 2,
+                                                        "& .MuiOutlinedInput-root": {
+                                                            borderRadius: 2,
+                                                            "& fieldset": { borderColor: "#e0e0e0" },
+                                                            "&:hover fieldset": { borderColor: "#bdbdbd" },
+                                                            "&.Mui-focused fieldset": { borderColor: "#1F9EF9" }
+                                                        }
+                                                    }}
+                                                />
+                                                <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1.5 }}>
+                                                    <Button
+                                                        variant="contained"
+                                                        onClick={handleCommentSubmit}
+                                                        disabled={!newComment.trim() || !user}
+                                                        endIcon={<SendIcon />}
+                                                        sx={{
+                                                            textTransform: "none",
+                                                            fontWeight: 700,
+                                                            px: 3,
+                                                            borderRadius: 2,
+                                                            background: "linear-gradient(45deg, #1F9EF9 30%, #21CBF3 90%)",
+                                                            boxShadow: "0 4px 12px rgba(31, 158, 249, 0.3)",
+                                                            "&:disabled": {
+                                                                background: "#e0e0e0",
+                                                                color: "#9e9e9e",
+                                                                boxShadow: "none"
+                                                            }
+                                                        }}
+                                                    >
+                                                        Publier
+                                                    </Button>
+                                                </Box>
+                                            </Box>
+                                        </Box>
+                                    </Box>
+                                </Paper>
+                            </Box>
                         </Grid>
                     </Grid>
                 </Container>
