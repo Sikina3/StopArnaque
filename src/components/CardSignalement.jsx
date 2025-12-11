@@ -6,11 +6,13 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 function CardSignalement({ id, titre, categorie, date, LikeNumber, ChatNumber, image, isLiked }) {
   const navigate = useNavigate();
   const [likes, setLikes] = useState(parseInt(LikeNumber) || 0);
-  const [liked, setLiked] = useState(isLiked);
+  const [liked, setLiked] = useState(isLiked || false);
+  const { user } = useAuth();
 
   const handleLike = async (e) => {
     e.preventDefault(); // Prevent navigation if inside a link
@@ -21,7 +23,10 @@ function CardSignalement({ id, titre, categorie, date, LikeNumber, ChatNumber, i
     setLikes(prev => newLiked ? prev + 1 : prev - 1);
 
     try {
-      await api.post('/reactions/toggle', { signalement_id: id });
+      await api.post('/reactions/toggle', {
+        signalement_id: id,
+        utilisateur_id: user.id
+      });
     } catch (error) {
       console.error("Erreur like:", error);
       // Revert

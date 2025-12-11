@@ -85,9 +85,6 @@ function SignalementDetails() {
                 utilisateur_id: user.id
             });
 
-            // Add the new comment to the list (optimistic or from response)
-            // The response should contain the created comment. 
-            // We need to ensure it has the user object for display.
             const createdComment = {
                 ...response.data,
                 utilisateur: user

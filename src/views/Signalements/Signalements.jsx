@@ -6,8 +6,10 @@ import TopNav from "../../components/TopNav";
 import Footer from "../../components/Footer";
 import CardSignalement from "../../components/CardSignalement";
 import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 function Signalements() {
+    const { user } = useAuth();
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
     const [statusFilter, setStatusFilter] = useState("all");
@@ -19,9 +21,12 @@ function Signalements() {
     // Fonction pour récupérer les signalements depuis l'API
     useEffect(() => {
         const fetchSignalements = async () => {
+            if (!user) return;
             try {
                 setLoading(true);
-                const response = await api.get('/signalements');
+                const response = await api.get('/signalements', {
+                    params: { utilisateur_id: user.id }
+                  });
 
                 // Vérifier que la réponse est bien un tableau
                 if (Array.isArray(response.data)) {
@@ -40,7 +45,7 @@ function Signalements() {
         };
 
         fetchSignalements();
-    }, []);
+    }, [user]);
 
     // Fonction pour calculer le temps écoulé depuis la création
     const getTimeAgo = (dateString) => {
@@ -57,7 +62,9 @@ function Signalements() {
     };
 
     // Filtrer les signalements
-    const filteredSignalements = signalements.filter((signal) => {
+    const filteredSignalements = signalements
+        .filter(s => s.status === 'Validé')
+        .filter((signal) => {
         const matchesSearch = searchTerm === "" ||
             signal.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
             signal.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -281,10 +288,10 @@ function Signalements() {
                                         titre={signal.titre}
                                         categorie={signal.type}
                                         date={getTimeAgo(signal.created_at)}
-                                        LikeNumber={signal.reactions_count}
+                                        LikeNumber={signal.likes_count}
                                         ChatNumber={signal.commentaires_count}
                                         image={imageUrl}
-                                        isLiked={signal.is_liked}
+                                        isLiked={signal.isLiked}
                                     />
                                 );
                             })}

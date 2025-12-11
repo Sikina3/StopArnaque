@@ -1,21 +1,27 @@
 import { Box, Button, Grid, Typography, Container } from "@mui/material";
 import CardSignalement from "../../components/CardSignalement";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
+import { useNavigate } from "react-router-dom";
 
 function LastSignalement() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [signalements, setSignalements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
   useEffect(() => {
+    if (!user) return;
     const fetchSignalements = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/signalements');
+        const response = await api.get('/signalements', {
+          params: { utilisateur_id: user.id }
+        });
 
         if (Array.isArray(response.data)) {
           setSignalements(response.data);
@@ -30,7 +36,7 @@ function LastSignalement() {
       };
     }
     fetchSignalements();
-  }, []);
+  }, [user]);
 
   const getTimeAgo = (dateString) => {
     const date = new Date(dateString);
@@ -117,10 +123,10 @@ function LastSignalement() {
                     titre={signal.titre}
                     categorie={signal.type}
                     date={getTimeAgo(signal.created_at)}
-                    LikeNumber={signal.reactions_count}
+                    LikeNumber={signal.likes_count}
                     ChatNumber={signal.commentaires_count}
                     image={imageUrl}
-                    isLiked={signal.is_liked}
+                    isLiked={signal.isLiked}
                   />
                 );
               })
