@@ -29,16 +29,19 @@ function SignalementDetails() {
     const [error, setError] = useState(null);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
+    const [likesCount, setLikesCount] = useState(0);
 
     useEffect(() => {
         const fetchSignalementDetails = async () => {
+            if (!user) return;
             try {
                 setLoading(true);
-                const response = await api.get(`/signalements/${id}`);
-                console.log("Détails signalement:", response.data);
+                const response = await api.get(`/signalements/${id}`, {
+                    params: { utilisateur_id: user.id }});
                 setSignalement(response.data);
+                // setLikesCount(signalement.likes_count)
                 setComments(response.data.commentaires || []);
-                setLiked(response.data.is_liked);
+                // setLiked(signalement.isLiked);
                 setError(null);
             } catch (err) {
                 console.error("Erreur récupération détails:", err);
@@ -51,7 +54,7 @@ function SignalementDetails() {
         if (id) {
             fetchSignalementDetails();
         }
-    }, [id]);
+    }, [id, user]);
 
     const handleLike = async () => {
         if (!user) {
@@ -298,7 +301,7 @@ function SignalementDetails() {
                                             })
                                         }}
                                     >
-                                        {liked ? "Aimé" : "J'aime"} ({signalement.reactions_count + (liked && !signalement.is_liked ? 1 : 0) - (!liked && signalement.is_liked ? 1 : 0)})
+                                        {liked ? "Aimé" : "J'aime"} ({signalement.likes_count})
                                     </Button>
                                 </Box>
                             </Paper>
