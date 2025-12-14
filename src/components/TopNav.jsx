@@ -21,11 +21,15 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Dropdown, MenuButton, Menu as JoyMenu, MenuItem as JoyMenuItem } from "@mui/joy";
 import NotificationMenu from "./NotificationMenu";
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
+import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
+import LoginRoundedIcon from '@mui/icons-material/LoginRounded';
 
 const pages = [
-  { label: "Accueil", route: "/" },
-  { label: "Signaler", route: "/signaler" },
-  { label: "Liste signalement", route: "/signalements" }
+  { label: <HomeRoundedIcon sx={{fontSize: {md: "1.8rem"}}} />, route: "/" },
+  { label: <AddCircleRoundedIcon sx={{fontSize: {md: "1.8rem"}}} />, route: "/signaler" },
+  { label: <AssignmentRoundedIcon sx={{fontSize: {md: "1.8rem"}}} />, route: "/signalements" }
 ];
 
 function TopNav() {
@@ -52,8 +56,8 @@ function TopNav() {
       top: 0,
       left: 0,
       right: 0,
-      px: { xs: 1.5, md: 4 },
-      py: { xs: 1, md: 2 },
+      px: { xs: 0, md: 4 },
+      py: { xs: 0, md: 2 },
       zIndex: 1100,
       backgroundColor: "rgb(255, 255, 255, 0.3)",
       backdropFilter: "blur(10px)",
@@ -64,8 +68,9 @@ function TopNav() {
         elevation={0}
         sx={{
           backgroundColor: "white",
-          borderRadius: { xs: 10, md: 10 },
-          boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
+          borderRadius: { md: 10 },
+          boxShadow: {md: "0 2px 12px rgba(0, 0, 0, 0.08)"},
+          py: {xs: 0.5}
         }}
       >
         <Container maxWidth="xl">
@@ -77,12 +82,12 @@ function TopNav() {
             }}
           >
             {/* Logo - Left Side */}
-            <Box sx={{ display: { xs: "none", md: "flex" }, mr: 4 }}>
+            <Box sx={{ display: { xs: "flex", md: "flex" }, mr: 4 }}>
               <Logo />
             </Box>
 
             {/* Mobile Menu Icon */}
-            <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            {/* <Box sx={{ display: { xs: "flex", md: "none" } }}>
               <IconButton
                 size="large"
                 aria-label="menu"
@@ -141,10 +146,10 @@ function TopNav() {
                   </MenuItem>
                 ))}
               </Menu>
-            </Box>
+            </Box> */}
 
             {/* Mobile Logo - Center */}
-            <Box
+            {/* <Box
               sx={{
                 flexGrow: 1,
                 display: { xs: "flex", md: "none" },
@@ -152,13 +157,13 @@ function TopNav() {
               }}
             >
               <Logo />
-            </Box>
+            </Box> */}
 
             {/* Desktop Navigation - Center */}
             <Box
               sx={{
                 flexGrow: 1,
-                display: { xs: "none", md: "flex" },
+                display: { xs: "flex", md: "flex" },
                 justifyContent: "center",
                 gap: 1
               }}
@@ -170,7 +175,7 @@ function TopNav() {
                   sx={{
                     px: 2,
                     py: 1,
-                    color: location.pathname === page.route ? "#1F9EF9" : "#333",
+                    color: location.pathname === page.route ? "#1F9EF9" : "#acababff",
                     fontFamily: "Lato",
                     fontSize: "15px",
                     fontWeight: location.pathname === page.route ? 600 : 400,
@@ -205,8 +210,8 @@ function TopNav() {
                     }}
                   >
                     <AccountCircleIcon sx={{
-                      color: "#1F9EF9",
-                      fontSize: "2rem"
+                      color: "#acababff",
+                      fontSize: {md: "2rem", xs: "1.8rem"}
                     }} />
                   </MenuButton>
 
@@ -271,7 +276,7 @@ function TopNav() {
                     "&:hover": { backgroundColor: "rgba(31, 158, 249, 0.08)" }
                   }}
                 >
-                  <AccountCircleIcon sx={{ fontSize: "2rem" }} />
+                  <LoginRoundedIcon sx={{ fontSize: "1.5rem" }} />
                 </IconButton>
 
                 {/* Desktop Buttons */}

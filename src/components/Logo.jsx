@@ -32,11 +32,11 @@ function Logo() {
         sx={{ 
           display: { xs: "flex", md: "none" },
           mr: 1,
-          fontSize: 20,
+          fontSize: 30,
           color: "#1F9EF9"
         }}
       />
-
+{/* 
       <Typography
         noWrap
         component="a"
@@ -50,7 +50,7 @@ function Logo() {
         }}
       >
         Signaleo
-      </Typography>
+      </Typography> */}
     </Box>
   );
 }

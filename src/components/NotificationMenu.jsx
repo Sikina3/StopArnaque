@@ -19,7 +19,7 @@ export default function NotificationMenu() {
     return (
         <Dropdown>
             <MenuButton
-                slots={{ root: 'div' }} // To avoid button inside button issues if any, but MenuButton is usually a button.
+                slots={{ root: 'div' }} 
                 variant="plain"
                 sx={{
                     borderRadius: "50%",
@@ -31,7 +31,7 @@ export default function NotificationMenu() {
                 }}
             >
                 <Badge badgeContent={unreadCount} color="danger" size="sm" invisible={unreadCount === 0}>
-                    <NotificationsIcon sx={{ color: "#1F9EF9", fontSize: "1.8rem" }} />
+                    <NotificationsIcon sx={{ color: "#acababff", fontSize: {md: "1.8rem"} }} />
                 </Badge>
             </MenuButton>
             <Menu

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box, CssBaseline } from "@mui/material";
 import TopNav from "../components/TopNav";
 import Welcom from "./Home/Welcom";
@@ -12,6 +13,7 @@ import FormSignal from "./FormSignal";
 import Signalements from "./Signalements/Signalements";
 import SignalementDetails from "./Signalements/SignalementDetails";
 import { useAuth } from "../context/AuthContext";
+import StartupPage from "../components/StartupPage";
 
 import ChatWidget from "../components/ChatWidget";
 
@@ -26,6 +28,11 @@ import AdminSettings from "./Admin/AdminSettings";
 
 function App() {
   const { user } = useAuth();
+  const [showSplash, setShowSplash] = useState(true);
+
+  if (showSplash) {
+    return <StartupPage onComplete={() => setShowSplash(false)} />;
+  }
 
   return (
     <BrowserRouter>

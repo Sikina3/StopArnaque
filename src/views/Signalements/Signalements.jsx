@@ -26,7 +26,7 @@ function Signalements() {
                 setLoading(true);
                 const response = await api.get('/signalements', {
                     params: { utilisateur_id: user.id }
-                  });
+                });
 
                 // Vérifier que la réponse est bien un tableau
                 if (Array.isArray(response.data)) {
@@ -65,16 +65,16 @@ function Signalements() {
     const filteredSignalements = signalements
         .filter(s => s.status === 'Validé')
         .filter((signal) => {
-        const matchesSearch = searchTerm === "" ||
-            signal.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            signal.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (signal.signal?.nom && signal.signal.nom.toLowerCase().includes(searchTerm.toLowerCase()));
+            const matchesSearch = searchTerm === "" ||
+                signal.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                signal.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (signal.signal?.nom && signal.signal.nom.toLowerCase().includes(searchTerm.toLowerCase()));
 
-        const matchesType = typeFilter === "all" || signal.type.toLowerCase() === typeFilter.toLowerCase();
-        const matchesStatus = statusFilter === "all" || signal.status.toLowerCase().includes(statusFilter.toLowerCase());
+            const matchesType = typeFilter === "all" || signal.type.toLowerCase() === typeFilter.toLowerCase();
+            const matchesStatus = statusFilter === "all" || signal.status.toLowerCase().includes(statusFilter.toLowerCase());
 
-        return matchesSearch && matchesType && matchesStatus;
-    });
+            return matchesSearch && matchesType && matchesStatus;
+        });
 
     const handleApplyFilters = () => {
         console.log("Filtres appliqués:", { searchTerm, typeFilter, statusFilter, dateFilter });

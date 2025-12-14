@@ -98,7 +98,6 @@ function FormSignal() {
         }
     };
 
-
     const Step0 = (
         <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: { md: 500, xs: 400 } }}>
             <Typography sx={{ marginBottom: 1, fontSize: { xs: "0.8rem", md: "1rem" } }}>Type d'arnaques *</Typography>
@@ -196,12 +195,14 @@ function FormSignal() {
             <TopNav />
 
             <Box sx={{
-                pt: { xs: "80px", md: "100px" },
+                pt: { xs: "80px", md: "8rem" },
                 minHeight: "100vh",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                paddingX: { md: 15, xs: 8 }
+                justifyContent: "center",
+                paddingX: { md: 15, xs: 8 },
+                py: 2
             }}>
                 {isSubmitting || isSuccess ? (
                     <SubmissionStatus isSuccess={isSuccess} />

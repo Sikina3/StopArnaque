@@ -9,7 +9,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -24,24 +24,43 @@ function SignalementDetails() {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [liked, setLiked] = useState(false);
+    const [likes, setLikes] = useState(0);
     const [signalement, setSignalement] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [comments, setComments] = useState([]);
+    const [commentCount, setCommentCount] = useState(0);
     const [newComment, setNewComment] = useState("");
-    const [likesCount, setLikesCount] = useState(0);
 
     useEffect(() => {
+
         const fetchSignalementDetails = async () => {
-            if (!user) return;
             try {
                 setLoading(true);
+
+                // 1. Récupérer les détails (pour les commentaires, etc.)
                 const response = await api.get(`/signalements/${id}`, {
-                    params: { utilisateur_id: user.id }});
+                    params: { utilisateur_id: user?.id }
+                });
                 setSignalement(response.data);
-                // setLikesCount(signalement.likes_count)
                 setComments(response.data.commentaires || []);
-                // setLiked(signalement.isLiked);
+
+                const responseList = await api.get('/signalements', {
+                    params: { utilisateur_id: user?.id }
+                });
+                const currentFromList = responseList.data.find(s => s.id === parseInt(id));
+
+                if (currentFromList) {
+                    setLikes(currentFromList.likes_count || 0);
+                    setCommentCount(currentFromList.commentaires_count || 0);
+                    setLiked(currentFromList.isLiked || false);
+                } else {
+                    // Fallback si non trouvé dans la liste (peu probable)
+                    setCommentCount(0);
+                    setLikes(0);
+                    setLiked(false);
+                }
+
                 setError(null);
             } catch (err) {
                 console.error("Erreur récupération détails:", err);
@@ -64,12 +83,14 @@ function SignalementDetails() {
 
         const newLiked = !liked;
         setLiked(newLiked);
+        setLikes(prev => newLiked ? prev + 1 : prev - 1);
 
         try {
             await api.post('/reactions/toggle', { signalement_id: id });
         } catch (error) {
             console.error("Erreur like:", error);
             setLiked(!newLiked);
+            setLikes(prev => newLiked ? prev - 1 : prev + 1);
         }
     };
 
@@ -109,7 +130,6 @@ function SignalementDetails() {
     const getImageUrl = (imageData) => {
         if (!imageData) return null;
         if (imageData.startsWith('data:') || imageData.startsWith('http')) return imageData;
-        // Assuming it's a storage path
         return `https://verlie-nonprosperous-pearl.ngrok-free.dev/storage/${imageData}`;
     };
 
@@ -157,9 +177,10 @@ function SignalementDetails() {
                         Retour aux signalements
                     </Button>
 
-                    <Grid container spacing={4}>
-                        <Grid item xs={12} md={8}>
-                            <Paper sx={{ p: 4, borderRadius: 3, mb: 4, border: "1px solid #f0f0f0" }}>
+                    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 2 }}>
+                        {/* Colonne Principale (Gauche) */}
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Paper sx={{ p: 4, borderRadius: 3, mb: 0.5, border: "1px solid #f0f0f0" }}>
                                 <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
                                     <Chip
                                         label={signalement.type}
@@ -190,37 +211,31 @@ function SignalementDetails() {
                                 <Typography variant="body1" sx={{ lineHeight: 1.8, color: "#333", fontFamily: "Lato", whiteSpace: 'pre-line' }}>
                                     {signalement.description}
                                 </Typography>
-                            </Paper>
 
-                            <Paper sx={{ p: 4, borderRadius: 3, mb: 4, border: "1px solid #f0f0f0", backgroundColor: "#fff9f0" }}>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
-                                    <WarningAmberIcon sx={{ color: "#ff9800", fontSize: "2rem" }} />
-                                    <Typography variant="h6" fontWeight={700} sx={{ fontFamily: "Lato", color: "#ff9800" }}>
-                                        Informations sur l'arnaqueur
+                                <Box sx={{ marginTop: 5, display: "flex", flexDirection: "row" }}>
+                                    {liked ? (
+                                        <FavoriteIcon
+                                            sx={{
+                                                color: "#e74c3c",
+                                                fontSize: { xs: 18, md: "2rem" },
+                                                transition: "transform 0.2s",
+                                                "&:active": { transform: "scale(1.2)" }
+                                            }}
+                                        />
+                                    ) : (
+                                        <FavoriteBorderOutlinedIcon
+                                            sx={{
+                                                color: "#999",
+                                                fontSize: { xs: 18, md: "2rem" },
+                                                transition: "color 0.2s",
+                                                "&:hover": { color: "#e74c3c" },
+                                            }}
+                                        />
+                                    )}
+                                    <Typography sx={{ color: liked ? "#e74c3c" : "#999", fontSize: { xs: "0.75rem", md: "1rem" }, fontWeight: liked ? 600 : 400 }}>
+                                        {likes}
                                     </Typography>
                                 </Box>
-
-                                <Grid container spacing={2}>
-                                    <Grid item xs={12} sm={6}>
-                                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                                            <PersonIcon sx={{ color: "#666" }} />
-                                            <Box>
-                                                <Typography variant="caption" color="text.secondary">Nom / Entité</Typography>
-                                                <Typography variant="body1" fontWeight={600}>{signalement.signal?.nom || "Non spécifié"}</Typography>
-                                            </Box>
-                                        </Box>
-                                    </Grid>
-
-                                    <Grid item xs={12} sm={6}>
-                                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                                            <PhoneIcon sx={{ color: "#666" }} />
-                                            <Box>
-                                                <Typography variant="caption" color="text.secondary">Contact (Tél/Email)</Typography>
-                                                <Typography variant="body1" fontWeight={600}>{signalement.signal?.contact || "Non spécifié"}</Typography>
-                                            </Box>
-                                        </Box>
-                                    </Grid>
-                                </Grid>
                             </Paper>
 
                             {signalement.preuves && signalement.preuves.length > 0 && (
@@ -252,178 +267,160 @@ function SignalementDetails() {
                                     </Grid>
                                 </Paper>
                             )}
-                        </Grid>
+                        </Box>
 
-                        <Grid item xs={12} md={4}>
-                            <Paper sx={{ p: 3, borderRadius: 3, mb: 3, border: "1px solid #f0f0f0" }}>
-                                <Typography variant="h6" fontWeight={700} gutterBottom sx={{ fontFamily: "Lato", mb: 2 }}>
-                                    Publié par
-                                </Typography>
-
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-                                    <Avatar sx={{ bgcolor: "#1F9EF9", width: 50, height: 50 }}>
-                                        {signalement.utilisateur?.name ? signalement.utilisateur.name[0].toUpperCase() : "A"}
-                                    </Avatar>
-                                    <Box>
-                                        <Typography variant="body1" fontWeight={600}>
-                                            {signalement.utilisateur?.name || "Anonyme"}
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            Membre de la communauté
+                        {/* Colonne Latérale (Droite) */}
+                        <Box sx={{ width: { xs: "100%", md: 400 }, flexShrink: 0 }}>
+                            <Box sx={{ top: "110px" }}>
+                                <Paper sx={{ p: 4, borderRadius: 3, mb: 0.5, border: "1px solid #f0f0f0", backgroundColor: "#fff9f0" }}>
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
+                                        <WarningAmberIcon sx={{ color: "#ff9800", fontSize: "2rem" }} />
+                                        <Typography variant="h6" fontWeight={700} sx={{ fontFamily: "Lato", color: "#ff9800" }}>
+                                            Informations sur l'arnaqueur
                                         </Typography>
                                     </Box>
-                                </Box>
-                            </Paper>
 
-                            <Paper sx={{ p: 3, borderRadius: 3, border: "1px solid #f0f0f0" }}>
-                                <Typography variant="h6" fontWeight={700} gutterBottom sx={{ fontFamily: "Lato", mb: 3 }}>
-                                    Interactions
-                                </Typography>
-
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                                    <Button
-                                        variant={liked ? "contained" : "outlined"}
-                                        startIcon={liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-                                        onClick={handleLike}
-                                        fullWidth
-                                        sx={{
-                                            textTransform: "none",
-                                            fontWeight: 600,
-                                            borderRadius: 2,
-                                            py: 1.5,
-                                            ...(liked ? {
-                                                background: "linear-gradient(45deg, #e74c3c 30%, #c0392b 90%)",
-                                                "&:hover": { background: "linear-gradient(45deg, #c0392b 30%, #a93226 90%)" }
-                                            } : {
-                                                borderColor: "#e74c3c",
-                                                color: "#e74c3c",
-                                                "&:hover": { borderColor: "#c0392b", backgroundColor: "rgba(231, 76, 60, 0.1)" }
-                                            })
-                                        }}
-                                    >
-                                        {liked ? "Aimé" : "J'aime"} ({signalement.likes_count})
-                                    </Button>
-                                </Box>
-                            </Paper>
-                        </Grid>
-
-                        {/* Section Commentaires Redesigned */}
-                        <Grid item xs={12} id="comment-section">
-                            <Box sx={{ mt: 2 }}>
-                                <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                                    <ChatBubbleOutlineIcon sx={{ color: "#1F9EF9", mr: 1.5, fontSize: 28 }} />
-                                    <Typography variant="h5" fontWeight={800} sx={{ fontFamily: "Lato", color: "#1A1A1A" }}>
-                                        Discussion ({comments.length})
-                                    </Typography>
-                                </Box>
-
-                                <Paper sx={{ borderRadius: 4, overflow: "hidden", border: "1px solid #f0f0f0", boxShadow: "0 4px 20px rgba(0,0,0,0.02)" }}>
-                                    {/* Liste des commentaires */}
-                                    <Box sx={{ bgcolor: "#fff", p: 0 }}>
-                                        {comments.length === 0 ? (
-                                            <Box sx={{ p: 6, textAlign: "center", bgcolor: "#fcfcfc" }}>
-                                                <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-                                                    Aucun commentaire pour le moment.
-                                                </Typography>
-                                                <Typography variant="body2" color="text.disabled">
-                                                    Soyez le premier à partager votre avis sur ce signalement.
-                                                </Typography>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12} sm={6}>
+                                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                                                <PersonIcon sx={{ color: "#666" }} />
+                                                <Box>
+                                                    <Typography variant="caption" color="text.secondary">Nom / Entité</Typography>
+                                                    <Typography variant="body1" fontWeight={600}>{signalement.signal?.nom || "Non spécifié"}</Typography>
+                                                </Box>
                                             </Box>
-                                        ) : (
-                                            <Box sx={{ maxHeight: '600px', overflowY: 'auto' }}>
-                                                {comments.map((comment, index) => (
-                                                    <Box key={comment.id}>
-                                                        <Box sx={{ p: 3, display: "flex", gap: 2, transition: "background-color 0.2s", "&:hover": { bgcolor: "#fafafa" } }}>
-                                                            <Avatar
-                                                                sx={{
-                                                                    bgcolor: `hsl(${(comment.utilisateur?.id * 137) % 360}, 70%, 50%)`,
-                                                                    width: 44,
-                                                                    height: 44,
-                                                                    fontSize: "1.1rem",
-                                                                    fontWeight: "bold",
-                                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
-                                                                }}
-                                                            >
-                                                                {comment.utilisateur?.name ? comment.utilisateur.name[0].toUpperCase() : "U"}
-                                                            </Avatar>
-                                                            <Box sx={{ flex: 1 }}>
-                                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.5 }}>
-                                                                    <Typography variant="subtitle1" fontWeight={700} sx={{ color: "#2c3e50" }}>
-                                                                        {comment.utilisateur?.name || "Utilisateur"}
-                                                                    </Typography>
-                                                                    <Typography variant="caption" sx={{ color: "#95a5a6", fontWeight: 500 }}>
-                                                                        {formatDate(comment.created_at)}
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={6}>
+                                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                                                <PhoneIcon sx={{ color: "#666" }} />
+                                                <Box>
+                                                    <Typography variant="caption" color="text.secondary">Contact (Tél/Email)</Typography>
+                                                    <Typography variant="body1" fontWeight={600}>{signalement.signal?.contact || "Non spécifié"}</Typography>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
+                                </Paper>
+
+                                {/* Section Commentaires */}
+                                <Box id="comment-section" sx={{ mt: 2, backgroundColor: "#f1f1f1ff", borderRadius: 4 }}>
+                                    <Box sx={{ display: "flex", alignItems: "center", mb: 3, py: 1, px: 2 }}>
+                                        <ChatBubbleOutlineIcon sx={{ color: "#1F9EF9", mr: 1.5, fontSize: 28 }} />
+                                        <Typography variant="h5" fontWeight={800} sx={{ fontFamily: "Lato", color: "#1A1A1A" }}>
+                                            Discussion ({commentCount})
+                                        </Typography>
+                                    </Box>
+
+                                    <Paper sx={{ overflow: "hidden" }}>
+                                        {/* Liste des commentaires */}
+                                        <Box sx={{ bgcolor: "#fff", p: 0 }}>
+                                            {comments.length === 0 ? (
+                                                <Box sx={{ p: 6, textAlign: "center", bgcolor: "#fcfcfc" }}>
+                                                    <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                                                        Aucun commentaire pour le moment.
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.disabled">
+                                                        Soyez le premier à partager votre avis sur ce signalement.
+                                                    </Typography>
+                                                </Box>
+                                            ) : (
+                                                <Box sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                                    {comments.map((comment, index) => (
+                                                        <Box key={comment.id}>
+                                                            <Box sx={{ p: 3, display: "flex", gap: 2, transition: "background-color 0.2s", "&:hover": { bgcolor: "#fafafa" } }}>
+                                                                <Avatar
+                                                                    sx={{
+                                                                        bgcolor: `hsl(${(comment.utilisateur?.id * 137) % 360}, 70%, 50%)`,
+                                                                        width: 44,
+                                                                        height: 44,
+                                                                        fontSize: "1.1rem",
+                                                                        fontWeight: "bold",
+                                                                        boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                                                                    }}
+                                                                >
+                                                                    {comment.utilisateur?.name ? comment.utilisateur.name[0].toUpperCase() : "U"}
+                                                                </Avatar>
+                                                                <Box sx={{ flex: 1 }}>
+                                                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.5 }}>
+                                                                        <Typography variant="subtitle1" fontWeight={700} sx={{ color: "#2c3e50" }}>
+                                                                            {comment.utilisateur?.name || "Utilisateur"}
+                                                                        </Typography>
+                                                                        <Typography variant="caption" sx={{ color: "#95a5a6", fontWeight: 500 }}>
+                                                                            {formatDate(comment.created_at)}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                    <Typography variant="body1" sx={{ color: "#4a5568", lineHeight: 1.6, fontSize: "0.95rem" }}>
+                                                                        {comment.contenue}
                                                                     </Typography>
                                                                 </Box>
-                                                                <Typography variant="body1" sx={{ color: "#4a5568", lineHeight: 1.6, fontSize: "0.95rem" }}>
-                                                                    {comment.contenue}
-                                                                </Typography>
                                                             </Box>
+                                                            {index < comments.length - 1 && <Divider sx={{ borderColor: "#f5f5f5" }} />}
                                                         </Box>
-                                                        {index < comments.length - 1 && <Divider sx={{ borderColor: "#f5f5f5" }} />}
-                                                    </Box>
-                                                ))}
-                                            </Box>
-                                        )}
-                                    </Box>
+                                                    ))}
+                                                </Box>
+                                            )}
+                                        </Box>
 
-                                    {/* Zone de saisie */}
-                                    <Box sx={{ p: 3, bgcolor: "#f8f9fa", borderTop: "1px solid #f0f0f0" }}>
-                                        <Box sx={{ display: "flex", gap: 2 }}>
-                                            <Avatar sx={{ bgcolor: "#1F9EF9", width: 40, height: 40 }}>
-                                                {user?.name ? user.name[0].toUpperCase() : <PersonIcon />}
-                                            </Avatar>
-                                            <Box sx={{ flex: 1 }}>
-                                                <TextField
-                                                    fullWidth
-                                                    multiline
-                                                    minRows={2}
-                                                    maxRows={4}
-                                                    placeholder={user ? "Ajouter un commentaire..." : "Connectez-vous pour commenter"}
-                                                    value={newComment}
-                                                    onChange={(e) => setNewComment(e.target.value)}
-                                                    disabled={!user}
-                                                    sx={{
-                                                        bgcolor: "#fff",
-                                                        borderRadius: 2,
-                                                        "& .MuiOutlinedInput-root": {
-                                                            borderRadius: 2,
-                                                            "& fieldset": { borderColor: "#e0e0e0" },
-                                                            "&:hover fieldset": { borderColor: "#bdbdbd" },
-                                                            "&.Mui-focused fieldset": { borderColor: "#1F9EF9" }
-                                                        }
-                                                    }}
-                                                />
-                                                <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1.5 }}>
-                                                    <Button
-                                                        variant="contained"
-                                                        onClick={handleCommentSubmit}
-                                                        disabled={!newComment.trim() || !user}
-                                                        endIcon={<SendIcon />}
+                                        {/* Zone de saisie */}
+                                        <Box sx={{ p: 1, bgcolor: "#f8f9fa", borderTop: "1px solid #f0f0f0" }}>
+                                            <Box sx={{ display: "flex", gap: 2 }}>
+                                                <Avatar sx={{ bgcolor: "#1F9EF9", width: 40, height: 40 }}>
+                                                    {user?.name ? user.name[0].toUpperCase() : <PersonIcon />}
+                                                </Avatar>
+                                                <Box sx={{ flex: 1 }}>
+                                                    <TextField
+                                                        fullWidth
+                                                        multiline
+                                                        minRows={2}
+                                                        maxRows={4}
+                                                        placeholder={user ? "Ajouter un commentaire..." : "Connectez-vous pour commenter"}
+                                                        value={newComment}
+                                                        onChange={(e) => setNewComment(e.target.value)}
+                                                        disabled={!user}
                                                         sx={{
-                                                            textTransform: "none",
-                                                            fontWeight: 700,
-                                                            px: 3,
+                                                            bgcolor: "#fff",
                                                             borderRadius: 2,
-                                                            background: "linear-gradient(45deg, #1F9EF9 30%, #21CBF3 90%)",
-                                                            boxShadow: "0 4px 12px rgba(31, 158, 249, 0.3)",
-                                                            "&:disabled": {
-                                                                background: "#e0e0e0",
-                                                                color: "#9e9e9e",
-                                                                boxShadow: "none"
+                                                            "& .MuiOutlinedInput-root": {
+                                                                borderRadius: 2,
+                                                                "& fieldset": { borderColor: "#e0e0e0" },
+                                                                "&:hover fieldset": { borderColor: "#bdbdbd" },
+                                                                "&.Mui-focused fieldset": { borderColor: "#1F9EF9" }
                                                             }
                                                         }}
-                                                    >
-                                                        Publier
-                                                    </Button>
+                                                    />
+                                                    <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1.5 }}>
+                                                        <Button
+                                                            variant="contained"
+                                                            onClick={handleCommentSubmit}
+                                                            disabled={!newComment.trim() || !user}
+                                                            endIcon={<SendIcon />}
+                                                            sx={{
+                                                                textTransform: "none",
+                                                                fontWeight: 700,
+                                                                px: 3,
+                                                                borderRadius: 2,
+                                                                background: "linear-gradient(45deg, #1F9EF9 30%, #21CBF3 90%)",
+                                                                boxShadow: "0 4px 12px rgba(31, 158, 249, 0.3)",
+                                                                "&:disabled": {
+                                                                    background: "#e0e0e0",
+                                                                    color: "#9e9e9e",
+                                                                    boxShadow: "none"
+                                                                }
+                                                            }}
+                                                        >
+                                                            Publier
+                                                        </Button>
+                                                    </Box>
                                                 </Box>
                                             </Box>
                                         </Box>
-                                    </Box>
-                                </Paper>
+                                    </Paper>
+
+                                </Box>
                             </Box>
-                        </Grid>
-                    </Grid>
+                        </Box>
+                    </Box>
                 </Container>
             </Box>
             <Footer />
