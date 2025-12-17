@@ -138,6 +138,7 @@ function WelcomConnect() {
                             variant="outlined"
                             size="large"
                             startIcon={<ChecklistIcon />}
+                            onClick={() => navigate("/signalements?filter=mine")}
                             sx={{
                                 py: 1.5,
                                 px: 4,

@@ -15,12 +15,16 @@ function LastSignalement() {
 
 
   useEffect(() => {
-    if (!user) return;
     const fetchSignalements = async () => {
       try {
         setLoading(true);
+        const params = {};
+        if (user) {
+          params.utilisateur_id = user.id;
+        }
+
         const response = await api.get('/signalements', {
-          params: { utilisateur_id: user.id }
+          params: params
         });
 
         if (Array.isArray(response.data)) {

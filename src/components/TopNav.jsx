@@ -27,9 +27,9 @@ import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import LoginRoundedIcon from '@mui/icons-material/LoginRounded';
 
 const pages = [
-  { label: <HomeRoundedIcon sx={{fontSize: {md: "1.8rem"}}} />, route: "/" },
-  { label: <AddCircleRoundedIcon sx={{fontSize: {md: "1.8rem"}}} />, route: "/signaler" },
-  { label: <AssignmentRoundedIcon sx={{fontSize: {md: "1.8rem"}}} />, route: "/signalements" }
+  { label: <HomeRoundedIcon sx={{ fontSize: { md: "1.8rem" } }} />, route: "/" },
+  { label: <AddCircleRoundedIcon sx={{ fontSize: { md: "1.8rem" } }} />, route: "/signaler" },
+  { label: <AssignmentRoundedIcon sx={{ fontSize: { md: "1.8rem" } }} />, route: "/signalements" }
 ];
 
 function TopNav() {
@@ -69,8 +69,8 @@ function TopNav() {
         sx={{
           backgroundColor: "white",
           borderRadius: { md: 10 },
-          boxShadow: {md: "0 2px 12px rgba(0, 0, 0, 0.08)"},
-          py: {xs: 0.5}
+          boxShadow: { md: "0 2px 12px rgba(0, 0, 0, 0.08)" },
+          py: { xs: 0.5 }
         }}
       >
         <Container maxWidth="xl">
@@ -82,82 +82,9 @@ function TopNav() {
             }}
           >
             {/* Logo - Left Side */}
-            <Box sx={{ display: { xs: "flex", md: "flex" }, mr: 4 }}>
+            <Box sx={{ display: { xs: "flex", md: "flex" }, mr: { xs: 1, md: 4 } }}>
               <Logo />
             </Box>
-
-            {/* Mobile Menu Icon */}
-            {/* <Box sx={{ display: { xs: "flex", md: "none" } }}>
-              <IconButton
-                size="large"
-                aria-label="menu"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleOpenNavMenu}
-                sx={{
-                  color: "#1F9EF9",
-                  "&:hover": { backgroundColor: "rgba(31, 158, 249, 0.08)" }
-                }}
-              >
-                <MenuIcon />
-              </IconButton>
-
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorElNav}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "left",
-                }}
-                open={Boolean(anchorElNav)}
-                onClose={handleCloseNavMenu}
-                sx={{
-                  display: { xs: "block", md: "none" },
-                  "& .MuiPaper-root": {
-                    backgroundColor: "white",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                    borderRadius: 2,
-                    mt: 1
-                  },
-                }}
-              >
-                {pages.map((page) => (
-                  <MenuItem
-                    key={page.label}
-                    onClick={() => {
-                      navigate(page.route);
-                      handleCloseNavMenu();
-                    }}
-                    sx={{
-                      fontFamily: "Lato",
-                      color: location.pathname === page.route ? "#1F9EF9" : "#333",
-                      fontWeight: location.pathname === page.route ? 600 : 400,
-                      "&:hover": {
-                        backgroundColor: "rgba(31, 158, 249, 0.08)"
-                      }
-                    }}
-                  >
-                    {page.label}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box> */}
-
-            {/* Mobile Logo - Center */}
-            {/* <Box
-              sx={{
-                flexGrow: 1,
-                display: { xs: "flex", md: "none" },
-                justifyContent: "center",
-              }}
-            >
-              <Logo />
-            </Box> */}
 
             {/* Desktop Navigation - Center */}
             <Box
@@ -165,16 +92,17 @@ function TopNav() {
                 flexGrow: 1,
                 display: { xs: "flex", md: "flex" },
                 justifyContent: "center",
-                gap: 1
+                gap: { xs: 0.5, md: 1 }
               }}
             >
               {pages.map((page) => (
                 <Button
-                  key={page.label}
+                  key={page.route}
                   onClick={() => navigate(page.route)}
                   sx={{
-                    px: 2,
+                    px: { xs: 1.5, md: 2 },
                     py: 1,
+                    minWidth: { xs: 0, md: 64 },
                     color: location.pathname === page.route ? "#1F9EF9" : "#acababff",
                     fontFamily: "Lato",
                     fontSize: "15px",
@@ -211,7 +139,7 @@ function TopNav() {
                   >
                     <AccountCircleIcon sx={{
                       color: "#acababff",
-                      fontSize: {md: "2rem", xs: "1.8rem"}
+                      fontSize: { md: "2rem", xs: "1.8rem" }
                     }} />
                   </MenuButton>
 

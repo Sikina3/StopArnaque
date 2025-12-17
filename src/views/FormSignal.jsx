@@ -114,7 +114,7 @@ function FormSignal() {
     };
 
     const Step0 = (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: { md: 500, xs: 400 } }}>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: "100%", maxWidth: 500 }}>
             <Typography sx={{ marginBottom: 1, fontSize: { xs: "0.8rem", md: "1rem" } }}>Type d'arnaques *</Typography>
             <Select
                 placeholder="selectionner"
@@ -148,7 +148,7 @@ function FormSignal() {
     );
 
     const Step1 = (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: { md: 500, xs: 400 } }}>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: "100%", maxWidth: 500 }}>
             <Typography sx={{ fontSize: { xs: "1rem", md: "1.2rem" }, fontWeight: 600 }}>Preuves et pièces justificatives</Typography>
             <Typography sx={{ fontSize: { md: "0.8rem", xs: "0.6rem" }, color: "#565d6d" }}>Ajoutez tout document, image ou lien qui pourrait appuyer votre signalement.</Typography>
             <Typography sx={{ fontSize: { md: "1rem", xs: "0.8rem" }, color: "#565d6d", marginTop: 2 }}>Telecharger les preuves *</Typography>
@@ -173,7 +173,7 @@ function FormSignal() {
     );
 
     const Step2 = (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: { md: 500, xs: 400 } }}>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "50%", width: "100%", maxWidth: 500 }}>
             <Typography sx={{ fontSize: { md: "1.2rem", xs: "1rem" }, fontWeight: 600 }}>Vos coordonnées (Confidentiel)</Typography>
 
             <Typography sx={{ marginTop: 2, fontSize: { md: "1rem", xs: "0.8rem" } }}>Votre nom Complet *</Typography>
@@ -216,7 +216,7 @@ function FormSignal() {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                paddingX: { md: 15, xs: 8 },
+                paddingX: { md: 15, xs: 2 },
                 py: 2
             }}>
                 {isSubmitting || isSuccess ? (
@@ -255,7 +255,8 @@ function FormSignal() {
                         <Box sx={{
                             display: "flex",
                             justifyContent: "space-between",
-                            width: { xs: "100%", md: 500 },
+                            width: "100%",
+                            maxWidth: 500,
                             marginTop: 6
                         }}>
                             <Button
@@ -308,8 +309,6 @@ function FormSignal() {
                     </>
                 )}
             </Box>
-
-            <Footer />
         </Box>
     );
 }

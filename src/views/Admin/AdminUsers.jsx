@@ -57,7 +57,7 @@ function AdminUsers() {
                 name: user.name || user.pseudo || 'Utilisateur',
                 email: user.email,
                 role: user.admin ? 'Admin' : 'Utilisateur',
-                status: user.is_online ? 'En ligne' : 'Hors ligne',
+                phone: user.phone,
                 signalements: user.signalements_count || 0,
                 joined: new Date(user.created_at).toLocaleDateString('fr-FR'),
                 avatar: (user.name || user.pseudo || 'U').substring(0, 2).toUpperCase(),
@@ -101,15 +101,6 @@ function AdminUsers() {
         handleMenuClose();
     };
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'En ligne': return 'success';
-            case 'Hors ligne': return 'default';
-            case 'Bloqué': return 'error';
-            default: return 'default';
-        }
-    };
-
     const getRoleColor = (role) => {
         switch (role) {
             case 'Admin': return '#8b5cf6';
@@ -141,7 +132,6 @@ function AdminUsers() {
                 {[
                     { label: 'Total Utilisateurs', value: users.length, color: '#1F9EF9' },
                     { label: 'En ligne', value: onlineCount, color: '#10b981' },
-                    { label: 'Hors ligne', value: users.length - onlineCount, color: '#6b7280' },
                     { label: 'Bloqués', value: '0', color: '#ef4444' },
                 ].map((stat, index) => (
                     <Card
@@ -203,7 +193,7 @@ function AdminUsers() {
                                     <TableCell sx={{ fontWeight: 700 }}>Utilisateur</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }}>Rôle</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Statut</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }}>Numero de Tel.</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }}>Signalements</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }}>Date d'inscription</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }}>Actions</TableCell>
@@ -242,9 +232,9 @@ function AdminUsers() {
                                         </TableCell>
                                         <TableCell>
                                             <Chip
-                                                label={user.status}
+                                                label={user.phone}
                                                 size="small"
-                                                color={getStatusColor(user.status)}
+                                                color={"red"}
                                             />
                                         </TableCell>
                                         <TableCell>

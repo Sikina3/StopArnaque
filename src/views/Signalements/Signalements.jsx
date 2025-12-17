@@ -8,8 +8,13 @@ import CardSignalement from "../../components/CardSignalement";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 
+import { useSearchParams } from "react-router-dom";
+
 function Signalements() {
     const { user } = useAuth();
+    const [searchParams] = useSearchParams();
+    const isMySignalements = searchParams.get("filter") === "mine";
+
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
     const [statusFilter, setStatusFilter] = useState("all");
@@ -21,11 +26,14 @@ function Signalements() {
     // Fonction pour récupérer les signalements depuis l'API
     useEffect(() => {
         const fetchSignalements = async () => {
-            if (!user) return;
             try {
                 setLoading(true);
+                const params = {};
+                if (user) {
+                    params.utilisateur_id = user.id;
+                }
                 const response = await api.get('/signalements', {
-                    params: { utilisateur_id: user.id }
+                    params: params
                 });
 
                 // Vérifier que la réponse est bien un tableau
@@ -63,7 +71,15 @@ function Signalements() {
 
     // Filtrer les signalements
     const filteredSignalements = signalements
-        .filter(s => s.status === 'Validé')
+        .filter(s => {
+            if (isMySignalements) {
+                // Si "Mes signalements", on filtre par ID utilisateur (et on garde tous les statuts)
+                return user && s.utilisateur_id === user.id;
+            } else {
+                // Sinon (page publique), on ne garde que les validés
+                return s.status === 'Validé';
+            }
+        })
         .filter((signal) => {
             const matchesSearch = searchTerm === "" ||
                 signal.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -92,7 +108,7 @@ function Signalements() {
                             fontWeight={800}
                             sx={{ fontFamily: "Lato", color: "#1A1A1A", mb: 1, fontSize: { xs: "1.8rem", md: "2.4rem" } }}
                         >
-                            Liste des signalements
+                            {isMySignalements ? "Mes signalements" : "Liste des signalements"}
                         </Typography>
                         <Box
                             sx={{
