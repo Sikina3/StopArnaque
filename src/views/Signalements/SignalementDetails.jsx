@@ -130,7 +130,7 @@ function SignalementDetails() {
     const getImageUrl = (imageData) => {
         if (!imageData) return null;
         if (imageData.startsWith('data:') || imageData.startsWith('http')) return imageData;
-        return `https://verlie-nonprosperous-pearl.ngrok-free.dev/storage/${imageData}`;
+        return `https://signaleo-backend-1.onrender.com/storage/${imageData}`;
     };
 
     if (loading) {

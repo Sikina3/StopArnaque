@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://verlie-nonprosperous-pearl.ngrok-free.dev/api",
+  baseURL: "https://signaleo-backend-1.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
     "ngrok-skip-browser-warning": "true",

@@ -14,12 +14,13 @@ export function AuthProvider({ children }) {
 
             if (data) {
                 const parsed = JSON.parse(data);
-                console.log("Les données: ", parsed.pseudo);
                 setUser(parsed);
 
                 try {
                     // Vérifier si l'utilisateur existe toujours en base de données
-                    await api.get(`/users/${parsed.id}`);
+                    const response = await api.get(`/users/${parsed.id}`);
+                    setUser(response.data);
+                    localStorage.setItem("user", JSON.stringify(response.data));
                 } catch (error) {
                     console.error("Erreur de vérification de l'utilisateur:", error);
                     // Si l'utilisateur n'existe pas (404) ou non autorisé (401), on déconnecte

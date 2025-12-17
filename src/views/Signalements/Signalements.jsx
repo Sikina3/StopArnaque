@@ -276,7 +276,11 @@ function Signalements() {
 
                                 if (signal.preuves && signal.preuves.length > 0 && signal.preuves[0].image) {
                                     const imagePath = signal.preuves[0].image;
-                                    imageUrl = `https://verlie-nonprosperous-pearl.ngrok-free.dev/storage/${imagePath}`;
+                                    if (imagePath.startsWith('http')) {
+                                        imageUrl = imagePath;
+                                    } else {
+                                        imageUrl = `https://signaleo-backend-1.onrender.com/storage/${imagePath}`;
+                                    }
                                     console.log("Image Url:", imageUrl);
 
                                 }

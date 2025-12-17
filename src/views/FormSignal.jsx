@@ -8,13 +8,14 @@ import FilePicker from "../components/FilePicker";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import SubmissionStatus from "../components/SubmissionStatus";
+import { uploadImage } from "../services/cloudinary";
 
 const steps = ['type et details', 'Preuves et pieces justificatives', 'Vos coordonnées (Confidentiel)'];
 
 function FormSignal() {
     const [activeStep, setActiveStep] = useState(0);
     const [proofs, setProofs] = useState([]);
-    const { user } = useAuth();
+    const { user, setUser } = useAuth();
 
     const [type, setType] = useState("");
     const [scammerName, setScammerName] = useState("");
@@ -52,37 +53,51 @@ function FormSignal() {
 
         try {
             setIsSubmitting(true);
-            const data = new FormData();
 
-            data.append("nom", scammerName);
-            data.append("contact", contact);
-            data.append("description", description);
-            data.append("titre", "Arnaque sur " + type + " " + city);
-            data.append("type", type);
-            data.append("utilisateur_id", user.id);
+            // 1. Upload des images sur Firebase
+            const uploadedUrls = [];
+            if (proofs.length > 0) {
+                console.log("Upload des images en cours...");
+                for (const file of proofs) {
+                    try {
+                        const url = await uploadImage(file);
+                        if (url) uploadedUrls.push(url);
+                    } catch (err) {
+                        console.error("Erreur upload fichier:", file.name, err);
+                        alert(`Erreur lors de l'envoi de l'image ${file.name}`);
+                        setIsSubmitting(false);
+                        return;
+                    }
+                }
+            }
 
-            // Ajouter les fichiers réels (pas leurs noms)
-            proofs.forEach((file) => {
-                data.append("preuves[]", file);
-            });
+            // 2. Préparation des données (JSON)
+            const payload = {
+                nom: scammerName,
+                contact: contact,
+                description: description,
+                titre: "Arnaque sur " + type + " " + city,
+                type: type,
+                utilisateur_id: user.id,
+                preuves: uploadedUrls // Tableau d'URLs
+            };
 
-            const res = await api.post("/signalements", data, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            // 3. Envoi au backend
+            const res = await api.post("/signalements", payload);
 
             // Mise à jour du profil de l'utilisateur
             const userData = {
-                name: user?.name || fullName,
-                ville: user?.ville || city,
-                email: user?.email || email,
-                phone: user?.phone || phone
+                name: fullName,
+                ville: city,
+                email: email,
+                phone: phone
             };
 
-            await api.put(`/users/${user.id}`, userData);
+            const userRes = await api.put(`/users/${user.id}`, userData);
+            setUser(userRes.data);
+            localStorage.setItem("user", JSON.stringify(userRes.data));
 
-            console.log("Enregistrer avec succès !");
+            console.log("Enregistré avec succès !");
             setIsSubmitting(false);
             setIsSuccess(true);
         } catch (error) {

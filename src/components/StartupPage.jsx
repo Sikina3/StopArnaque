@@ -11,7 +11,6 @@ const StartupPage = ({ onComplete }) => {
     useEffect(() => {
         const tl = gsap.timeline({
             onComplete: () => {
-                // Optional: Fade out the whole container before unmounting
                 gsap.to(containerRef.current, {
                     opacity: 0,
                     duration: 0.5,
@@ -20,19 +19,19 @@ const StartupPage = ({ onComplete }) => {
             }
         });
 
-        // Initial set
+        // set initiae
         gsap.set([logoRef.current, textRef.current], { opacity: 0, y: 20 });
 
         // Animation sequence
         tl.to(logoRef.current, {
             opacity: 1,
             y: 0,
-            duration: 1,
+            duration: 0.5,
             ease: "power3.out"
         })
             .to(logoRef.current, {
                 scale: 1.2,
-                duration: 1.5,
+                duration: 1,
                 yoyo: true,
                 repeat: 1,
                 ease: "sine.inOut"
@@ -43,7 +42,7 @@ const StartupPage = ({ onComplete }) => {
                 duration: 0.8,
                 ease: "power3.out"
             }, "-=1.5")
-            .to({}, { duration: 1.5 }); // Wait a bit at the end (total approx 4-5s)
+            .to({}, { duration: 0.5 }); 
 
         return () => {
             tl.kill();
