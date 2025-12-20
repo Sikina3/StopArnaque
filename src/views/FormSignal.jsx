@@ -18,6 +18,8 @@ function FormSignal() {
     const { user, setUser } = useAuth();
 
     const [type, setType] = useState("");
+    const [customType, setCustomType] = useState("");
+    const [existingTypes, setExistingTypes] = useState(["Phishing", "Hack de compte", "Faux vendeurs / Faux acheteurs", "Colis bloqué"]);
     const [scammerName, setScammerName] = useState("");
     const [contact, setContact] = useState("");
     const [description, setDescription] = useState("");
@@ -29,6 +31,22 @@ function FormSignal() {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+
+    useEffect(() => {
+        const fetchTypes = async () => {
+            try {
+                const res = await api.get("/signalements");
+                if (Array.isArray(res.data)) {
+                    const types = res.data.map(s => s.type);
+                    const uniqueTypes = [...new Set([...existingTypes, ...types])].filter(t => t);
+                    setExistingTypes(uniqueTypes);
+                }
+            } catch (err) {
+                console.error("Erreur lors de la récupération des types:", err);
+            }
+        };
+        fetchTypes();
+    }, []);
 
     useEffect(() => {
         if (user) {
@@ -71,13 +89,15 @@ function FormSignal() {
                 }
             }
 
+            const finalType = type === "Autre" ? customType : type;
+
             // 2. Préparation des données (JSON)
             const payload = {
                 nom: scammerName,
                 contact: contact,
                 description: description,
-                titre: "Arnaque sur " + type + " " + city,
-                type: type,
+                titre: "Arnaque sur " + finalType + " " + city,
+                type: finalType,
                 utilisateur_id: user.id,
                 preuves: uploadedUrls // Tableau d'URLs
             };
@@ -122,7 +142,6 @@ function FormSignal() {
                 value={type}
                 onChange={(e, newValue) => setType(newValue)}
                 sx={{
-                    // width: {},
                     [`& .${selectClasses.indicator}`]: {
                         transition: '0.2s',
                         [`&.${selectClasses.expanded}`]: { transform: 'rotate(-180deg)' },
@@ -130,11 +149,27 @@ function FormSignal() {
                     fontSize: { xs: "0.8rem", md: "1rem" }
                 }}
             >
-                <Option sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} value="Phishing">Phishing</Option>
-                <Option sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} value="Hack de compte">Hack de compte</Option>
-                <Option sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} value="Faux vendeurs / Faux acheteurs">Faux vendeurs / Faux acheteurs</Option>
-                <Option sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} value="Colis bloqué">Colis bloqué</Option>
+                {existingTypes.map((t, idx) => (
+                    <Option key={idx} sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} value={t}>{t}</Option>
+                ))}
+                <Option sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} value="Autre">Autre (Préciser...)</Option>
             </Select>
+
+            {type === "Autre" && (
+                <Input
+                    placeholder="Précisez le type d'arnaque"
+                    value={customType}
+                    onChange={(e) => setCustomType(e.target.value)}
+                    sx={{
+                        marginTop: 2,
+                        fontSize: { xs: "0.8rem", md: "1rem" },
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                        "&:focus-within": {
+                            boxShadow: "0 4px 12px rgba(31, 158, 249, 0.2)"
+                        }
+                    }}
+                />
+            )}
 
             <Typography sx={{ marginBottom: 1, marginTop: 3, fontSize: { xs: "0.8rem", md: "1rem" } }}>Nom / Entreprise *</Typography>
             <Input sx={{ fontSize: { xs: "0.8rem", md: "1rem" } }} placeholder="Nom de la personne ou de l'entreprise" value={scammerName} onChange={(e) => setScammerName(e.target.value)} />

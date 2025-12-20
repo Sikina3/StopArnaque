@@ -65,9 +65,51 @@ function Signin() {
                     `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${TokenRounded.access_token}`
                 );
 
-                console.log("User Google: ", userInfo.data);
+                const googleUser = userInfo.data;
+                console.log("User Google: ", googleUser);
+
+                // 1. Récupérer tous les utilisateurs pour vérifier si l'email existe
+                const usersRes = await api.get("/users");
+                const allUsers = Array.isArray(usersRes.data) ? usersRes.data : [];
+
+                console.log("Nombre d'utilisateurs en base: ", allUsers.length);
+
+                const existingUser = allUsers.find(u =>
+                    u.email && u.email.toLowerCase() === googleUser.email.toLowerCase()
+                );
+
+                if (existingUser) {
+                    console.log("Utilisateur existant trouvé: ", existingUser);
+                    // Si l'utilisateur existe, on le connecte directement
+                    localStorage.setItem("user", JSON.stringify(existingUser));
+                    setSnackbar({ open: true, message: "Connexion Google réussie !", severity: "success" });
+                    setTimeout(() => {
+                        setUser(existingUser);
+                        navigate("/");
+                    }, 1500);
+                } else {
+                    console.log("Nouvel utilisateur Google, création en cours...");
+                    // Si l'utilisateur n'existe pas, on le crée
+                    const pwdAuto = Math.random().toString(36).slice(-10);
+                    const res = await api.post("/users", {
+                        name: googleUser.name,
+                        pseudo: googleUser.given_name || googleUser.name,
+                        email: googleUser.email,
+                        password: pwdAuto,
+                    });
+
+                    console.log("Compte créé via Google: ", res.data);
+                    localStorage.setItem("user", JSON.stringify(res.data));
+                    setSnackbar({ open: true, message: "Compte créé et connecté via Google !", severity: "success" });
+
+                    setTimeout(() => {
+                        setUser(res.data);
+                        navigate("/");
+                    }, 1500);
+                }
             } catch (error) {
-                console.error("Erreur lors de la récuperation du profile google: ", error)
+                console.error("Erreur Google Login: ", error);
+                setSnackbar({ open: true, message: "Erreur lors de la connexion Google.", severity: "error" });
             }
         },
         onError: () => {

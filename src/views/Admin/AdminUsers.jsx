@@ -7,6 +7,7 @@ import {
     Typography,
     Table,
     TableBody,
+    Divider,
     TableCell,
     TableContainer,
     TableHead,
@@ -20,6 +21,14 @@ import {
     InputAdornment,
     Menu,
     MenuItem,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    FormControlLabel,
+    Switch,
+    Alert,
+    CircularProgress,
 } from '@mui/material';
 import {
     Search as SearchIcon,
@@ -27,27 +36,34 @@ import {
     Edit as EditIcon,
     Block as BlockIcon,
     CheckCircle as CheckCircleIcon,
+    Delete as DeleteIcon,
+    Chat as ChatIcon,
+    Add as AddIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 function AdminUsers() {
     const [searchTerm, setSearchTerm] = useState('');
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
     const [users, setUsers] = useState([]);
-    const [onlineCount, setOnlineCount] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [createLoading, setCreateLoading] = useState(false);
+    const [createError, setCreateError] = useState('');
+    const [newUser, setNewUser] = useState({
+        name: '',
+        pseudo: '',
+        email: '',
+        phone: '',
+        password: '',
+        admin: true
+    });
+    const navigate = useNavigate();
 
     useEffect(() => {
-        fetchData();
-        const interval = setInterval(fetchOnlineUsers, 30000);
-        return () => clearInterval(interval);
+        fetchUsers();
     }, []);
-
-    const fetchData = async () => {
-        setLoading(true);
-        await Promise.all([fetchUsers(), fetchOnlineUsers()]);
-        setLoading(false);
-    };
 
     const fetchUsers = async () => {
         try {
@@ -68,14 +84,6 @@ function AdminUsers() {
         }
     };
 
-    const fetchOnlineUsers = async () => {
-        try {
-            const response = await api.get('/users/online');
-            setOnlineCount(response.data.online_users);
-        } catch (error) {
-            console.error('Erreur lors du chargement des utilisateurs en ligne:', error);
-        }
-    };
 
     const handleMenuOpen = (event, user) => {
         setAnchorEl(event.currentTarget);
@@ -101,6 +109,50 @@ function AdminUsers() {
         handleMenuClose();
     };
 
+    const handleDelete = async () => {
+        if (!selectedUser) return;
+        if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${selectedUser.name} ?`)) {
+            try {
+                await api.delete(`/users/${selectedUser.id}`);
+                setUsers(users.filter(u => u.id !== selectedUser.id));
+                handleMenuClose();
+            } catch (error) {
+                console.error("Erreur lors de la suppression:", error);
+                alert("Erreur lors de la suppression de l'utilisateur.");
+            }
+        }
+    };
+
+    const handleMessage = () => {
+        if (!selectedUser) return;
+        navigate(`/admin/messages?userId=${selectedUser.id}`);
+        handleMenuClose();
+    };
+
+    const handleCreateUser = async (e) => {
+        e.preventDefault();
+        setCreateLoading(true);
+        setCreateError('');
+
+        try {
+            const res = await api.post('/users', newUser);
+            // Recharger la liste
+            fetchUsers();
+            setCreateDialogOpen(false);
+            setNewUser({
+                name: '',
+                phone: '',
+                password: '',
+                admin: true
+            });
+        } catch (error) {
+            console.error("Erreur création utilisateur:", error);
+            setCreateError(error.response?.data?.message || "Erreur lors de la création du compte.");
+        } finally {
+            setCreateLoading(false);
+        }
+    };
+
     const getRoleColor = (role) => {
         switch (role) {
             case 'Admin': return '#8b5cf6';
@@ -111,9 +163,10 @@ function AdminUsers() {
     };
 
     const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        String(user.name).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(user.email).toLowerCase().includes(searchTerm.toLowerCase())
     );
+    
 
     return (
         <Box>
@@ -131,7 +184,6 @@ function AdminUsers() {
             <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>
                 {[
                     { label: 'Total Utilisateurs', value: users.length, color: '#1F9EF9' },
-                    { label: 'En ligne', value: onlineCount, color: '#10b981' },
                     { label: 'Bloqués', value: '0', color: '#ef4444' },
                 ].map((stat, index) => (
                     <Card
@@ -175,9 +227,17 @@ function AdminUsers() {
                         />
                         <Button
                             variant="contained"
-                            sx={{ borderRadius: 2 }}
+                            startIcon={<AddIcon />}
+                            onClick={() => setCreateDialogOpen(true)}
+                            sx={{
+                                borderRadius: 2,
+                                background: 'linear-gradient(45deg, #1F9EF9 30%, #21CBF3 90%)',
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                px: 3
+                            }}
                         >
-                            Rechercher
+                            Ajouter un admin
                         </Button>
                     </Box>
                 </CardContent>
@@ -265,6 +325,10 @@ function AdminUsers() {
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
             >
+                <MenuItem onClick={handleMessage}>
+                    <ChatIcon sx={{ mr: 1, fontSize: 20, color: '#1F9EF9' }} />
+                    Envoyer un message
+                </MenuItem>
                 <MenuItem onClick={handleEdit}>
                     <EditIcon sx={{ mr: 1, fontSize: 20 }} />
                     Modifier
@@ -277,7 +341,79 @@ function AdminUsers() {
                     <BlockIcon sx={{ mr: 1, fontSize: 20, color: '#ef4444' }} />
                     Bloquer
                 </MenuItem>
+                <Divider />
+                <MenuItem onClick={handleDelete} sx={{ color: '#ef4444' }}>
+                    <DeleteIcon sx={{ mr: 1, fontSize: 20 }} />
+                    Supprimer le compte
+                </MenuItem>
             </Menu>
+
+            {/* Create User Dialog */}
+            <Dialog
+                open={createDialogOpen}
+                onClose={() => !createLoading && setCreateDialogOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle sx={{ fontWeight: 800 }}>Créer un nouveau compte</DialogTitle>
+                <form onSubmit={handleCreateUser}>
+                    <DialogContent dividers>
+                        {createError && (
+                            <Alert severity="error" sx={{ mb: 2 }}>{createError}</Alert>
+                        )}
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <TextField
+                                label="Nom"
+                                required
+                                fullWidth
+                                value={newUser.name}
+                                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                            />
+                            <TextField
+                                label="Numéro de téléphone"
+                                required
+                                fullWidth
+                                value={newUser.phone}
+                                onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                            />
+                            <TextField
+                                label="Mot de passe"
+                                type="password"
+                                required
+                                fullWidth
+                                value={newUser.password}
+                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={newUser.admin}
+                                        onChange={(e) => setNewUser({ ...newUser, admin: e.target.checked })}
+                                        color="primary"
+                                    />
+                                }
+                                label="Droits d'administrateur"
+                            />
+                        </Box>
+                    </DialogContent>
+                    <DialogActions sx={{ p: 2.5 }}>
+                        <Button
+                            onClick={() => setCreateDialogOpen(false)}
+                            disabled={createLoading}
+                        >
+                            Annuler
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={createLoading}
+                            sx={{ borderRadius: 2, px: 4 }}
+                        >
+                            {createLoading ? <CircularProgress size={24} color="inherit" /> : "Créer le compte"}
+                        </Button>
+                    </DialogActions>
+                </form>
+            </Dialog>
         </Box>
     );
 }

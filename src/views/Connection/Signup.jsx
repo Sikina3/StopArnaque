@@ -77,23 +77,44 @@ function Signup() {
 
         console.log("USER GOOGLE :", googleUser);
 
-        const pwdAuto = Math.random().toString(36).slice(-10);
+        // 1. Vérifier si l'utilisateur existe déjà
+        const usersRes = await api.get("/users");
+        const allUsers = Array.isArray(usersRes.data) ? usersRes.data : [];
 
-        const res = await api.post("/users", {
-          pseudo: googleUser.given_name,
-          email: googleUser.email,
-          password: pwdAuto,
-        });
+        const existingUser = allUsers.find(u =>
+          u.email && u.email.toLowerCase() === googleUser.email.toLowerCase()
+        );
 
-        console.log("Inscription google ok: ", res.data);
+        if (existingUser) {
+          // Si l'utilisateur existe, on le connecte
+          localStorage.setItem("user", JSON.stringify(existingUser));
+          setSnackbar({ open: true, message: "Connexion via Google réussie !", severity: "success" });
 
-        localStorage.setItem("user", JSON.stringify(res.data));
-        setSnackbar({ open: true, message: "Inscription via Google réussie ! Redirection...", severity: "success" });
+          setTimeout(() => {
+            setUser(existingUser);
+            navigate("/");
+          }, 1500);
+        } else {
+          // Sinon on le crée
+          const pwdAuto = Math.random().toString(36).slice(-10);
 
-        setTimeout(() => {
-          setUser(res.data);
-          navigate("/");
-        }, 1500);
+          const res = await api.post("/users", {
+            name: googleUser.name,
+            pseudo: googleUser.given_name || googleUser.name,
+            email: googleUser.email,
+            password: pwdAuto,
+          });
+
+          console.log("Inscription google ok: ", res.data);
+
+          localStorage.setItem("user", JSON.stringify(res.data));
+          setSnackbar({ open: true, message: "Inscription via Google réussie !", severity: "success" });
+
+          setTimeout(() => {
+            setUser(res.data);
+            navigate("/");
+          }, 1500);
+        }
 
       } catch (err) {
         console.log(err);

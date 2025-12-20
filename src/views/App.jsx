@@ -14,6 +14,7 @@ import Signalements from "./Signalements/Signalements";
 import SignalementDetails from "./Signalements/SignalementDetails";
 import { useAuth } from "../context/AuthContext";
 import StartupPage from "../components/StartupPage";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 import ChatWidget from "../components/ChatWidget";
 
@@ -25,6 +26,7 @@ import AdminSignalements from "./Admin/AdminSignalements";
 import AdminUsers from "./Admin/AdminUsers";
 import AdminAnalytics from "./Admin/AdminAnalytics";
 import AdminSettings from "./Admin/AdminSettings";
+import AdminMessages from "./Admin/AdminMessages";
 
 function App() {
   const { user } = useAuth();
@@ -59,18 +61,21 @@ function App() {
         <Route path="/signalements" element={<Signalements />} />
         <Route path="/signalements/:id" element={<SignalementDetails />} />
 
-        {/* Admin Routes - SÉCURITÉ DÉSACTIVÉE TEMPORAIREMENT */}
+        {/* Admin Routes - SÉCURITÉ ACTIVÉE */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="signalements" element={<AdminSignalements />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="analytics" element={<AdminAnalytics />} />
-          <Route path="settings" element={<AdminSettings />} />
+        <Route path="/admin" element={<ProtectedRoute isAdmin={true} />}>
+          <Route element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="signalements" element={<AdminSignalements />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="settings" element={<AdminSettings />} />
+            <Route path="messages" element={<AdminMessages />} />
+          </Route>
         </Route>
       </Routes>
-      {user && <ChatWidget />}
+      {user && !user.admin && <ChatWidget />}
     </BrowserRouter>
   );
 }

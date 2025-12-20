@@ -40,11 +40,11 @@ const ChatWidget = () => {
     }, []);
 
     useEffect(() => {
-        if (!isOpen || !user) return;
+        if (!isOpen || !user || !adminId) return;
 
         const fetchMessage = async () => {
             try {
-                const res = await api.get('/messages', { params: { user_id: user.id } });
+                const res = await api.get('/messages', { params: { user_id: user.id, admin_id: adminId } });
                 const sortedMessage = res.data.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
                 setMessage(sortedMessage);
             } catch (error) {
@@ -52,7 +52,7 @@ const ChatWidget = () => {
             }
         };
         fetchMessage();
-    }, [isOpen, user]);
+    }, [isOpen, user, adminId]);
 
     const handleSend = async () => {
         console.log("adminId: ", adminId, "message: ", newMessage);

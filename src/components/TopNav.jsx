@@ -27,9 +27,9 @@ import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import LoginRoundedIcon from '@mui/icons-material/LoginRounded';
 
 const pages = [
-  { label: <HomeRoundedIcon sx={{ fontSize: { md: "1.8rem" } }} />, route: "/" },
-  { label: <AddCircleRoundedIcon sx={{ fontSize: { md: "1.8rem" } }} />, route: "/signaler" },
-  { label: <AssignmentRoundedIcon sx={{ fontSize: { md: "1.8rem" } }} />, route: "/signalements" }
+  { label: "Accueil", icon: <HomeRoundedIcon />, route: "/" },
+  { label: "Signaler", icon: <AddCircleRoundedIcon />, route: "/signaler" },
+  { label: "Signalements", icon: <AssignmentRoundedIcon />, route: "/signalements" }
 ];
 
 function TopNav() {
@@ -73,7 +73,7 @@ function TopNav() {
           py: { xs: 0.5 }
         }}
       >
-        <Container maxWidth="xl">
+        <Container maxWidth="lg">
           <Toolbar
             disableGutters
             sx={{
@@ -92,30 +92,47 @@ function TopNav() {
                 flexGrow: 1,
                 display: { xs: "flex", md: "flex" },
                 justifyContent: "center",
-                gap: { xs: 0.5, md: 1 }
+                gap: { xs: 0.5, md: 3 }
               }}
             >
               {pages.map((page) => (
                 <Button
                   key={page.route}
                   onClick={() => navigate(page.route)}
+                  startIcon={React.cloneElement(page.icon, {
+                    sx: {
+                      fontSize: { xs: "1.5rem", md: "1.4rem" },
+                      color: location.pathname === page.route ? "#1F9EF9" : "inherit"
+                    }
+                  })}
                   sx={{
-                    px: { xs: 1.5, md: 2 },
+                    px: { xs: 1, md: 2 },
                     py: 1,
-                    minWidth: { xs: 0, md: 64 },
+                    minWidth: { xs: 0, md: "auto" },
                     color: location.pathname === page.route ? "#1F9EF9" : "#acababff",
                     fontFamily: "Lato",
                     fontSize: "15px",
-                    fontWeight: location.pathname === page.route ? 600 : 400,
+                    fontWeight: location.pathname === page.route ? 700 : 500,
                     textTransform: "none",
                     borderRadius: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    "& .MuiButton-startIcon": {
+                      marginRight: { xs: 0, md: 1 },
+                      ml: 0
+                    },
                     "&:hover": {
                       backgroundColor: "rgba(31, 158, 249, 0.08)",
-                      color: "#1F9EF9"
+                      color: "#1F9EF9",
+                      "& .MuiButton-startIcon": {
+                        color: "#1F9EF9"
+                      }
                     }
                   }}
                 >
-                  {page.label}
+                  <Box component="span" sx={{ display: { xs: "none", md: "inline" } }}>
+                    {page.label}
+                  </Box>
                 </Button>
               ))}
             </Box>

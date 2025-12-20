@@ -17,9 +17,9 @@ function Signalements() {
 
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
-    const [statusFilter, setStatusFilter] = useState("all");
     const [dateFilter, setDateFilter] = useState("");
     const [signalements, setSignalements] = useState([]);
+    const [availableTypes, setAvailableTypes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -39,6 +39,12 @@ function Signalements() {
                 // Vérifier que la réponse est bien un tableau
                 if (Array.isArray(response.data)) {
                     setSignalements(response.data);
+
+                    // Extraire les types uniques pour le filtre
+                    const types = response.data.map(s => s.type).filter(t => t);
+                    const uniqueTypes = [...new Set(types)];
+                    setAvailableTypes(uniqueTypes);
+
                     setError(null);
                 } else {
                     console.error('Format de données invalide:', response.data);
@@ -87,9 +93,15 @@ function Signalements() {
                 (signal.signal?.nom && signal.signal.nom.toLowerCase().includes(searchTerm.toLowerCase()));
 
             const matchesType = typeFilter === "all" || signal.type.toLowerCase() === typeFilter.toLowerCase();
-            const matchesStatus = statusFilter === "all" || signal.status.toLowerCase().includes(statusFilter.toLowerCase());
 
-            return matchesSearch && matchesType && matchesStatus;
+            // Filtrage par date
+            let matchesDate = true;
+            if (dateFilter) {
+                const signalDate = new Date(signal.created_at).toISOString().split('T')[0];
+                matchesDate = signalDate === dateFilter;
+            }
+
+            return matchesSearch && matchesType && matchesDate;
         });
 
     const handleApplyFilters = () => {
@@ -127,11 +139,14 @@ function Signalements() {
                             p: 4,
                             borderRadius: 4,
                             boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                            mb: 6
+                            mb: 6,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center"
                         }}
                     >
                         <Grid container spacing={3} alignItems="flex-end">
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={4}>
                                 <Typography variant="body2" fontWeight={600} sx={{ mb: 1, fontFamily: "Lato", color: "#565d6d" }}>
                                     Rechercher par mot-clé
                                 </Typography>
@@ -151,7 +166,7 @@ function Signalements() {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} md={2.5}>
+                            <Grid item xs={12} md={3}>
                                 <Typography variant="body2" fontWeight={600} sx={{ mb: 1, fontFamily: "Lato", color: "#565d6d" }}>
                                     Type de signalement
                                 </Typography>
@@ -167,37 +182,14 @@ function Signalements() {
                                         }}
                                     >
                                         <MenuItem value="all">Tous les types</MenuItem>
-                                        <MenuItem value="phishing">Phishing</MenuItem>
-                                        <MenuItem value="emploi">Faux emplois</MenuItem>
-                                        <MenuItem value="investissement">Faux investissements</MenuItem>
-                                        <MenuItem value="smishing">Smishing</MenuItem>
+                                        {availableTypes.map((t, idx) => (
+                                            <MenuItem key={idx} value={t.toLowerCase()}>{t}</MenuItem>
+                                        ))}
                                     </Select>
                                 </FormControl>
                             </Grid>
 
-                            <Grid item xs={12} md={2.5}>
-                                <Typography variant="body2" fontWeight={600} sx={{ mb: 1, fontFamily: "Lato", color: "#565d6d" }}>
-                                    Statut
-                                </Typography>
-                                <FormControl fullWidth>
-                                    <Select
-                                        value={statusFilter}
-                                        onChange={(e) => setStatusFilter(e.target.value)}
-                                        sx={{
-                                            borderRadius: 2,
-                                            height: "40px",
-                                            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                                            fontFamily: "Lato"
-                                        }}
-                                    >
-                                        <MenuItem value="all">Tous les statuts</MenuItem>
-                                        <MenuItem value="valide">Validé</MenuItem>
-                                        <MenuItem value="attente">En attente</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-
-                            <Grid item xs={12} md={2.5}>
+                            <Grid item xs={12} md={3}>
                                 <Typography variant="body2" fontWeight={600} sx={{ mb: 1, fontFamily: "Lato", color: "#565d6d" }}>
                                     Date de publication
                                 </Typography>
@@ -216,10 +208,13 @@ function Signalements() {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} md={1.5}>
+                            <Grid item xs={12} md={2}>
                                 <Button
                                     variant="contained"
-                                    onClick={handleApplyFilters}
+                                    onClick={() => {
+                                        // Le filtrage est déjà réactif, on peut ajouter un petit feedback ici si besoin
+                                        console.log("Filtres mis à jour");
+                                    }}
                                     sx={{
                                         width: "100%",
                                         height: "40px",
@@ -235,7 +230,7 @@ function Signalements() {
                                         }
                                     }}
                                 >
-                                    Appliquer
+                                    Filtrer
                                 </Button>
                             </Grid>
                         </Grid>

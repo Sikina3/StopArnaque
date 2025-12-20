@@ -27,6 +27,7 @@ import {
     Notifications as NotificationsIcon,
     Logout as LogoutIcon,
     ChevronLeft as ChevronLeftIcon,
+    Chat as ChatIcon,
 } from '@mui/icons-material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
@@ -36,6 +37,7 @@ const menuItems = [
     { text: 'Tableau de bord', icon: <DashboardIcon />, path: '/admin/dashboard' },
     { text: 'Signalements', icon: <ReportIcon />, path: '/admin/signalements' },
     { text: 'Utilisateurs', icon: <PeopleIcon />, path: '/admin/users' },
+    { text: 'Messages', icon: <ChatIcon />, path: '/admin/messages' },
     { text: 'Statistiques', icon: <AnalyticsIcon />, path: '/admin/analytics' },
     { text: 'Paramètres', icon: <SettingsIcon />, path: '/admin/settings' },
 ];

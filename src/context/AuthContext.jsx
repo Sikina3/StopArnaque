@@ -7,6 +7,7 @@ const AuthContext = createContext();
 // Provider du contexte
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const verifyUser = async () => {
@@ -17,19 +18,18 @@ export function AuthProvider({ children }) {
                 setUser(parsed);
 
                 try {
-                    // Vérifier si l'utilisateur existe toujours en base de données
                     const response = await api.get(`/users/${parsed.id}`);
                     setUser(response.data);
                     localStorage.setItem("user", JSON.stringify(response.data));
                 } catch (error) {
                     console.error("Erreur de vérification de l'utilisateur:", error);
-                    // Si l'utilisateur n'existe pas (404) ou non autorisé (401), on déconnecte
                     if (error.response && (error.response.status === 404 || error.response.status === 401)) {
                         localStorage.removeItem("user");
                         setUser(null);
                     }
                 }
             }
+            setLoading(false);
         };
 
         verifyUser();
@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, setUser, logout }}>
+        <AuthContext.Provider value={{ user, setUser, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

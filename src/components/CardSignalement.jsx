@@ -36,7 +36,7 @@ function CardSignalement({ id, titre, categorie, date, LikeNumber, ChatNumber, i
   };
 
   return (
-    <Grid item xs={12} sm={6} md={4} sx={{ display: 'flex' }}>
+    <Grid item xs={12} sm={6} md={4} sx={{ display: 'flex', width: "20rem" }}>
       <Paper
         // elevation={0}
         sx={{

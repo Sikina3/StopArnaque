@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import {
     Box,
     Card,
@@ -10,6 +12,8 @@ import {
     InputAdornment,
     IconButton,
     Container,
+    Alert,
+    CircularProgress,
 } from '@mui/material';
 import {
     Visibility,
@@ -23,10 +27,36 @@ function AdminLogin() {
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
-    const handleLogin = (e) => {
+    const { setUser } = useAuth();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleLogin = async (e) => {
         e.preventDefault();
-        // Mode développement - redirection directe
-        navigate('/admin/dashboard');
+        setLoading(true);
+        setError('');
+
+        try {
+            const res = await api.post("/login", {
+                phone: email, // On utilise le champ email pour le phone
+                password,
+            });
+
+            const userData = res.data.user;
+
+            if (userData.admin === true || userData.admin === 1 || userData.admin === "1") {
+                localStorage.setItem("user", JSON.stringify(userData));
+                setUser(userData);
+                navigate('/admin/dashboard');
+            } else {
+                setError("Accès refusé : Vous n'avez pas les droits d'administrateur.");
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Identifiants incorrects ou erreur serveur.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -91,6 +121,11 @@ function AdminLogin() {
                         </Box>
 
                         {/* Login Form */}
+                        {error && (
+                            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                                {error}
+                            </Alert>
+                        )}
                         <form onSubmit={handleLogin}>
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                                 <TextField
@@ -128,6 +163,7 @@ function AdminLogin() {
                                     variant="contained"
                                     size="large"
                                     fullWidth
+                                    disabled={loading}
                                     sx={{
                                         py: 1.5,
                                         borderRadius: 2,
@@ -141,7 +177,7 @@ function AdminLogin() {
                                         }
                                     }}
                                 >
-                                    Se connecter
+                                    {loading ? <CircularProgress size={24} color="inherit" /> : "Se connecter"}
                                 </Button>
                             </Box>
                         </form>
