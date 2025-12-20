@@ -20,6 +20,15 @@ function Signup() {
   const [passwordConfirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+
+  // État pour suivre les erreurs par champ
+  const [errors, setErrors] = useState({
+    pseudo: false,
+    phone: false,
+    password: false,
+    passwordConfirm: false
+  });
+
   const navigate = useNavigate();
   const { setUser } = useAuth();
 
@@ -31,12 +40,40 @@ function Signup() {
   };
 
   const handleSignup = async () => {
+    // Réinitialiser les erreurs visuelles
+    setErrors({
+      pseudo: !pseudo,
+      phone: !phone,
+      password: !password,
+      passwordConfirm: !passwordConfirm
+    });
+
     if (!pseudo || !phone || !password || !passwordConfirm) {
       setSnackbar({ open: true, message: "Veuillez remplir toutes les informations.", severity: "warning" });
       return;
     }
 
+    // Validation du numéro de téléphone
+    const phoneRegex = /^(032|033|034)\d{7}$/;
+    if (!phoneRegex.test(phone)) {
+      setErrors(prev => ({ ...prev, phone: true }));
+      setSnackbar({
+        open: true,
+        message: "Le numéro de téléphone doit commencer par 032, 033 ou 034 et contenir 10 chiffres.",
+        severity: "error"
+      });
+      return;
+    }
+
+    // Validation du mot de passe
+    if (password.length < 6) {
+      setErrors(prev => ({ ...prev, password: true }));
+      setSnackbar({ open: true, message: "Le mot de passe doit contenir au moins 6 caractères.", severity: "error" });
+      return;
+    }
+
     if (password !== passwordConfirm) {
+      setErrors(prev => ({ ...prev, passwordConfirm: true }));
       setSnackbar({ open: true, message: "Les mots de passe ne correspondent pas.", severity: "warning" });
       return;
     }
@@ -50,8 +87,6 @@ function Signup() {
         password,
       });
 
-      console.log("Inscription reussi : ", res.data);
-
       localStorage.setItem("user", JSON.stringify(res.data));
       setSnackbar({ open: true, message: "Compte créé avec succès ! Redirection...", severity: "success" });
 
@@ -62,7 +97,21 @@ function Signup() {
 
     } catch (err) {
       console.log(err);
-      setSnackbar({ open: true, message: "Erreur lors de l'inscription. Veuillez réessayer.", severity: "error" });
+      let errorMessage = "Erreur lors de l'inscription. Veuillez réessayer.";
+
+      if (err.response && err.response.data && err.response.data.errors) {
+        const backendErrors = err.response.data.errors;
+        if (backendErrors.phone) {
+          setErrors(prev => ({ ...prev, phone: true }));
+          errorMessage = "Ce numéro de téléphone est déjà utilisé.";
+        } else if (backendErrors.email) {
+          errorMessage = "Cet email est déjà utilisé.";
+        } else {
+          errorMessage = Object.values(backendErrors).flat()[0];
+        }
+      }
+
+      setSnackbar({ open: true, message: errorMessage, severity: "error" });
       setLoading(false);
     }
   };
@@ -75,9 +124,6 @@ function Signup() {
         );
         const googleUser = userInfo.data;
 
-        console.log("USER GOOGLE :", googleUser);
-
-        // 1. Vérifier si l'utilisateur existe déjà
         const usersRes = await api.get("/users");
         const allUsers = Array.isArray(usersRes.data) ? usersRes.data : [];
 
@@ -86,7 +132,6 @@ function Signup() {
         );
 
         if (existingUser) {
-          // Si l'utilisateur existe, on le connecte
           localStorage.setItem("user", JSON.stringify(existingUser));
           setSnackbar({ open: true, message: "Connexion via Google réussie !", severity: "success" });
 
@@ -95,17 +140,13 @@ function Signup() {
             navigate("/");
           }, 1500);
         } else {
-          // Sinon on le crée
           const pwdAuto = Math.random().toString(36).slice(-10);
-
           const res = await api.post("/users", {
             name: googleUser.name,
             pseudo: googleUser.given_name || googleUser.name,
             email: googleUser.email,
             password: pwdAuto,
           });
-
-          console.log("Inscription google ok: ", res.data);
 
           localStorage.setItem("user", JSON.stringify(res.data));
           setSnackbar({ open: true, message: "Inscription via Google réussie !", severity: "success" });
@@ -115,9 +156,7 @@ function Signup() {
             navigate("/");
           }, 1500);
         }
-
       } catch (err) {
-        console.log(err);
         setSnackbar({ open: true, message: "Erreur lors de l'inscription Google.", severity: "error" });
       }
     },
@@ -141,7 +180,11 @@ function Signup() {
       <Input
         placeholder="Pseudo"
         value={pseudo}
-        onChange={(e) => setPseudo(e.target.value)}
+        error={errors.pseudo}
+        onChange={(e) => {
+          setPseudo(e.target.value);
+          if (errors.pseudo) setErrors(prev => ({ ...prev, pseudo: false }));
+        }}
         sx={{
           fontSize: { md: "0.9rem", xs: "0.8rem" },
           fontFamily: "Lato",
@@ -152,12 +195,17 @@ function Signup() {
             boxShadow: "0 4px 12px rgba(31, 158, 249, 0.2)"
           }
         }}
-        endDecorator={<PersonIcon fontSize="small" sx={{ color: "#1F9EF9" }} />}
+        endDecorator={<PersonIcon fontSize="small" sx={{ color: errors.pseudo ? "#d32f2f" : "#1F9EF9" }} />}
       />
+
       <Input
         placeholder="Numéro de téléphone"
         value={phone}
-        onChange={(e) => setPhone(e.target.value)}
+        error={errors.phone}
+        onChange={(e) => {
+          setPhone(e.target.value.replace(/\D/g, ''));
+          if (errors.phone) setErrors(prev => ({ ...prev, phone: false }));
+        }}
         sx={{
           fontSize: { md: "0.9rem", xs: "0.8rem" },
           fontFamily: "Lato",
@@ -168,13 +216,18 @@ function Signup() {
             boxShadow: "0 4px 12px rgba(31, 158, 249, 0.2)"
           }
         }}
-        endDecorator={<PhoneIcon fontSize="small" sx={{ color: "#1F9EF9" }} />}
+        endDecorator={<PhoneIcon fontSize="small" sx={{ color: errors.phone ? "#d32f2f" : "#1F9EF9" }} />}
       />
+
       <Input
         type="password"
         placeholder="Mot de passe"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        error={errors.password}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          if (errors.password) setErrors(prev => ({ ...prev, password: false }));
+        }}
         sx={{
           fontSize: { md: "0.9rem", xs: "0.8rem" },
           fontFamily: "Lato",
@@ -185,13 +238,18 @@ function Signup() {
             boxShadow: "0 4px 12px rgba(31, 158, 249, 0.2)"
           }
         }}
-        endDecorator={<HttpsIcon fontSize="small" sx={{ color: "#1F9EF9" }} />}
+        endDecorator={<HttpsIcon fontSize="small" sx={{ color: errors.password ? "#d32f2f" : "#1F9EF9" }} />}
       />
+
       <Input
         type="password"
         placeholder="Confirmer le mot de passe"
         value={passwordConfirm}
-        onChange={(e) => setConfirm(e.target.value)}
+        error={errors.passwordConfirm}
+        onChange={(e) => {
+          setConfirm(e.target.value);
+          if (errors.passwordConfirm) setErrors(prev => ({ ...prev, passwordConfirm: false }));
+        }}
         sx={{
           fontSize: { md: "0.9rem", xs: "0.8rem" },
           fontFamily: "Lato",
@@ -202,7 +260,7 @@ function Signup() {
             boxShadow: "0 4px 12px rgba(31, 158, 249, 0.2)"
           }
         }}
-        endDecorator={<HttpsIcon fontSize="small" sx={{ color: "#1F9EF9" }} />}
+        endDecorator={<HttpsIcon fontSize="small" sx={{ color: errors.passwordConfirm ? "#d32f2f" : "#1F9EF9" }} />}
       />
 
       <Button
